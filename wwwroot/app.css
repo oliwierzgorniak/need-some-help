@@ -1,0 +1,51 @@
+:root {
+  /* Color Variables from Figma */
+  --material-theme-sys-light-primary: #3c6090;
+  --material-theme-sys-light-background: #f9f9ff;
+  --material-theme-sys-light-on-primary: #ffffff;
+
+  /* Additional colors for Onboarding 2 */
+  --material-theme-sys-light-secondary-container: #d8e3f8;
+  --material-theme-sys-light-on-secondary-container: #3d4758;
+  --material-theme-sys-light-tertiary: #6e5676;
+
+  /* Typography Variables from Figma */
+  /* Headline Large: Roboto Regular 32px/40px */
+  --font-headline-large-family: "Roboto", sans-serif;
+  --font-headline-large-size: 2rem;
+  --font-headline-large-line-height: 2.5rem;
+  --font-headline-large-weight: 400;
+
+  /* Body Large: Roboto Regular 16px/24px, 0.5px tracking */
+  --font-body-large-family: "Roboto", sans-serif;
+  --font-body-large-size: 1rem;
+  --font-body-large-line-height: 1.5rem;
+  --font-body-large-weight: 400;
+  --tracking-body-large: 0.03125rem;
+
+  /* Label Large (Button): Roboto Medium 14px/20px, 0.1px tracking */
+  --font-label-large-family: "Roboto", sans-serif;
+  --font-label-large-size: 0.875rem;
+  --font-label-large-line-height: 1.25rem;
+  --font-label-large-weight: 500;
+  --tracking-label-large: 0.00625rem;
+
+  /* Radzen Theme Overrides */
+  --rz-primary: var(--material-theme-sys-light-primary);
+  --rz-on-primary: var(--material-theme-sys-light-on-primary);
+  --rz-text-font-family: "Roboto", sans-serif;
+  /* Additional Radzen Mappings */
+  --rz-body-background-color: var(--material-theme-sys-light-background);
+  /* Maps to CSS variable for component text color if needed, usually inherits */
+  --rz-text-color: #000000;
+  --rz-base-background-color: #ffffff; /* Standard Surface color */
+
+  /* Input/Form styling checks */
+  --rz-input-focus-border: var(--material-theme-sys-light-primary);
+}
+
+html,
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: var(--material-theme-sys-light-background);
+}

@@ -1,0 +1,29 @@
+@page "/Error"
+@using System.Diagnostics
+@using Microsoft.AspNetCore.Components.Web
+
+<PageTitle>Error</PageTitle>
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+<div class="alert alert-danger">
+    <strong>Request ID:</strong> <code>@RequestId</code>
+</div>
+
+<p>
+    <strong>For development environment:</strong>
+    The <strong>Development</strong> environment displays detailed information about the exception that occurred.
+</p>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+    }
+}
