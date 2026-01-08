@@ -12,13 +12,15 @@
         <RadzenStack Gap="0.375rem" AlignItems="AlignItems.Center" Style="width: 100%; text-align: center; margin-top: 1rem;">
              <!-- Headline -->
             <RadzenText Text="@Headline" 
-                        TagName="TagName.P"
-                        Style="font-family: var(--font-headline-large-family); font-weight: var(--font-headline-large-weight); font-size: var(--font-headline-large-size); line-height: var(--font-headline-large-line-height); margin: 0; color: black;" />
+                        TextStyle="TextStyle.H4"
+                        TagName="TagName.H2"
+                        Style="color: black;" />
             
              <!-- Subhead -->
             <RadzenText Text="@Subhead" 
+                        TextStyle="TextStyle.Body1"
                         TagName="TagName.P"
-                        Style="font-family: var(--font-body-large-family); font-weight: var(--font-body-large-weight); font-size: var(--font-body-large-size); line-height: var(--font-body-large-line-height); letter-spacing: var(--tracking-body-large); margin: 0; color: black;" />
+                        Style="color: black;" />
         </RadzenStack>
 
             <OnboardingNavigation Progress="@Progress" BackUrl="@BackUrl" NextUrl="@NextUrl" />
