@@ -1,61 +1,11 @@
 @page "/onboarding/2"
-@using Radzen
-@using Radzen.Blazor
-@inject NavigationManager NavigationManager
 @rendermode RenderMode.InteractiveServer
 
-<!-- Layout matches Figma Node 58:6832 -->
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" 
-             Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); padding: 1.625rem 2.5rem;">
-
-    <!-- Relative Container for flexible stacking similar to Onboarding 1 but adapted -->
-    <RadzenStack Gap="1.4375rem" AlignItems="AlignItems.Center" Style="width: 100%; max-width: 239px;"> 
-        
-        <!-- Image Node 101:293 -->
-        <RadzenImage Path="assets/onboarding/help-hand.png" Style="width: 18.75rem; max-width: 100%; height: auto; object-fit: contain;" AlternateText="Need a hand" />
-
-        <!-- Text Group Node 58:6842 -->
-        <RadzenStack Gap="0.375rem" AlignItems="AlignItems.Center" Style="width: 100%; text-align: center; margin-top: 1rem;">
-             <!-- Headline Node 58:6843 -->
-            <RadzenText Text="Need a hand?" 
-                        TagName="TagName.P"
-                        Style="font-family: var(--font-headline-large-family); font-weight: var(--font-headline-large-weight); font-size: var(--font-headline-large-size); line-height: var(--font-headline-large-line-height); margin: 0; color: black;" />
-            
-             <!-- Subhead Node 58:6844 -->
-            <RadzenText Text="Connect with kind people nearby who are willing to help" 
-                        TagName="TagName.P"
-                        Style="font-family: var(--font-body-large-family); font-weight: var(--font-body-large-weight); font-size: var(--font-body-large-size); line-height: var(--font-body-large-line-height); letter-spacing: var(--tracking-body-large); margin: 0; color: black;" />
-        </RadzenStack>
-
-        <!-- Progress Bar Node 58:7760 (Simplified) -->
-        <RadzenProgressBar Value="50" ShowValue="false" Style="height: 0.5rem; width: 4.75rem; --rz-series-1: var(--material-theme-sys-light-primary); background-color: var(--material-theme-sys-light-secondary-container);" />
-        
-        <!-- Buttons Row -->
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Style="width: 100%; margin-top: 1rem;">
-             <!-- Back Button Node 58:7429 -->
-            <RadzenButton Text="Back" 
-                          Click="@OnBackClick"
-                          Style="background-color: var(--material-theme-sys-light-secondary-container); color: var(--material-theme-sys-light-on-secondary-container); border-radius: 0.75rem; font-family: var(--font-label-large-family); font-weight: var(--font-label-large-weight); font-size: var(--font-label-large-size); letter-spacing: var(--tracking-label-large); line-height: var(--font-label-large-line-height); text-transform: none; border: none;" />
-            
-             <!-- Next Button Node 58:6852 (Same as Onboarding 1) -->
-            <RadzenButton Text="Next" 
-                          ButtonStyle="ButtonStyle.Primary"
-                          Click="@OnNextClick"
-                          Style="border-radius: 0.75rem; font-family: var(--font-label-large-family); font-weight: var(--font-label-large-weight); font-size: var(--font-label-large-size); letter-spacing: var(--tracking-label-large); line-height: var(--font-label-large-line-height); text-transform: none;" />
-        </RadzenStack>
-
-    </RadzenStack>
-
-</RadzenStack>
-
-@code {
-    void OnBackClick()
-    {
-        NavigationManager.NavigateTo("/onboarding/1");
-    }
-
-    void OnNextClick()
-    {
-        // Navigate to next step or home
-    }
-}
+<OnboardingContent 
+    ImagePath="assets/onboarding/2.png"
+    ImageAltText="Need a hand"
+    Headline="Need a hand?"
+    Subhead="Connect with kind people nearby who are willing to help"
+    Progress="50"
+    BackUrl="/onboarding/1"
+    NextUrl="/onboarding/3" />

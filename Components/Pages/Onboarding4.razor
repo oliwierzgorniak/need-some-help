@@ -1,0 +1,62 @@
+@page "/onboarding/4"
+@rendermode RenderMode.InteractiveServer
+@inject NavigationManager NavigationManager
+
+<!-- Layout matches Figma Node 62:8180 -->
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" 
+             Gap="1.9rem"
+             Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); padding: 1.875rem 0.625rem;">
+
+    <!-- Image + Text Group: Node 112:347 -->
+    <RadzenStack Gap="0.75rem" AlignItems="AlignItems.End" Style="width: 18.4375rem; max-width: 100%;"> 
+        
+        <!-- Image: Node 101:305 -->
+        <RadzenImage Path="assets/onboarding/4.png" Style="width: 100%; height: auto; object-fit: contain;" AlternateText="Crypto features" />
+
+        <!-- Text Group: Node 112:346 -->
+        <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center" Style="width: 100%; text-align: center;">
+             <!-- Headline - Headline Medium 28px -->
+            <RadzenText Text="Crypto features" 
+                        TextStyle="TextStyle.H5"
+                        TagName="TagName.H2"
+                        Style="color: black;" />
+            
+             <!-- Subhead - Body Medium 14px -->
+            <RadzenText Text="Build a trusted history of help and send digital tips. Use your own wallet or let us set it up automatically for you." 
+                        TextStyle="TextStyle.Body2"
+                        TagName="TagName.P"
+                        Style="color: black;" />
+        </RadzenStack>
+
+    </RadzenStack>
+
+    <!-- Buttons Group: Node 112:355 -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.8rem" AlignItems="AlignItems.Center" Style="width: 7.9375rem;">
+        <!-- Connect Wallet Button -->
+        <RadzenButton Text="Connect wallet" 
+                      ButtonStyle="ButtonStyle.Primary"
+                      Click="@ConnectWallet"
+                      Style="white-space: nowrap;"
+                      />  
+
+        <!-- Skip Button -->
+        <RadzenButton Text="Skip" 
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Click="@Skip"
+                      />
+    </RadzenStack>
+
+</RadzenStack>
+
+@code {
+    void ConnectWallet()
+    {
+        // !TODO: Implement wallet connection logic
+        NavigationManager.NavigateTo("/home");
+    }
+
+    void Skip()
+    {
+        NavigationManager.NavigateTo("/home");
+    }
+}

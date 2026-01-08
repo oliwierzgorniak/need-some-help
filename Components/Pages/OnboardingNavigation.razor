@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager NavigationManager
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Style="width: 100%; margin-top: 1rem; gap: 48px;">
+    <!-- Back Button -->
+    <RadzenButton Text="Back" 
+                  Click="@(args => NavigationManager.NavigateTo(BackUrl))"
+                  ButtonStyle="ButtonStyle.Secondary" />
+    
+    <!-- Progress Bar -->
+    <RadzenProgressBar Value="@Progress" ShowValue="false" />
+
+    <!-- Next Button -->
+    <RadzenButton Text="Next" 
+                  ButtonStyle="ButtonStyle.Primary"
+                  Click="@(args => NavigationManager.NavigateTo(NextUrl))" />
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public double Progress { get; set; }
+
+    [Parameter]
+    public string BackUrl { get; set; } = "";
+
+    [Parameter]
+    public string NextUrl { get; set; } = "";
+}

@@ -8,6 +8,7 @@
   --material-theme-sys-light-secondary-container: #d8e3f8;
   --material-theme-sys-light-on-secondary-container: #3d4758;
   --material-theme-sys-light-tertiary: #6e5676;
+  --material-theme-sys-light-on-tertiary: #ffffff;
 
   /* Typography Variables from Figma */
   /* Headline Large: Roboto Regular 32px/40px */
@@ -16,12 +17,25 @@
   --font-headline-large-line-height: 2.5rem;
   --font-headline-large-weight: 400;
 
+  /* Headline Medium: Roboto Regular 28px/36px */
+  --font-headline-medium-family: "Roboto", sans-serif;
+  --font-headline-medium-size: 1.75rem;
+  --font-headline-medium-line-height: 2.25rem;
+  --font-headline-medium-weight: 400;
+
   /* Body Large: Roboto Regular 16px/24px, 0.5px tracking */
   --font-body-large-family: "Roboto", sans-serif;
   --font-body-large-size: 1rem;
   --font-body-large-line-height: 1.5rem;
   --font-body-large-weight: 400;
   --tracking-body-large: 0.03125rem;
+
+  /* Body Medium: Roboto Regular 14px/20px, 0.25px tracking */
+  --font-body-medium-family: "Roboto", sans-serif;
+  --font-body-medium-size: 0.875rem;
+  --font-body-medium-line-height: 1.25rem;
+  --font-body-medium-weight: 400;
+  --tracking-body-medium: 0.015625rem;
 
   /* Label Large (Button): Roboto Medium 14px/20px, 0.1px tracking */
   --font-label-large-family: "Roboto", sans-serif;
@@ -33,15 +47,74 @@
   /* Radzen Theme Overrides */
   --rz-primary: var(--material-theme-sys-light-primary);
   --rz-on-primary: var(--material-theme-sys-light-on-primary);
+  --rz-secondary: var(--material-theme-sys-light-secondary-container);
+  --rz-on-secondary: var(--material-theme-sys-light-on-secondary-container);
+  --rz-info: var(
+    --material-theme-sys-light-tertiary
+  ); /* Mapping Tertiary to Info for availability */
+  --rz-on-info: var(--material-theme-sys-light-on-tertiary);
+
   --rz-text-font-family: "Roboto", sans-serif;
+
   /* Additional Radzen Mappings */
   --rz-body-background-color: var(--material-theme-sys-light-background);
+  --rz-base-background-color: var(--material-theme-sys-light-background);
   /* Maps to CSS variable for component text color if needed, usually inherits */
   --rz-text-color: #000000;
-  --rz-base-background-color: #ffffff; /* Standard Surface color */
 
   /* Input/Form styling checks */
   --rz-input-focus-border: var(--material-theme-sys-light-primary);
+  --rz-series-1: var(--material-theme-sys-light-tertiary);
+}
+
+/* Map Figma tokens to Radzen Typography Classes */
+
+/* Headline Large -> H3 (or whichever standard you prefer, H4 is 32px in M3 usually) */
+/* We will hijack H4 for Headline Large (32px) */
+.rz-text-h4 {
+  font-family: var(--font-headline-large-family);
+  font-size: var(--font-headline-large-size);
+  line-height: var(--font-headline-large-line-height);
+  font-weight: var(--font-headline-large-weight);
+  margin: 0;
+}
+
+/* Headline Medium -> H5 (28px) */
+.rz-text-h5 {
+  font-family: var(--font-headline-medium-family);
+  font-size: var(--font-headline-medium-size);
+  line-height: var(--font-headline-medium-line-height);
+  font-weight: var(--font-headline-medium-weight);
+  margin: 0;
+}
+
+/* Body Large -> Body1 */
+.rz-text-body1 {
+  font-family: var(--font-body-large-family);
+  font-size: var(--font-body-large-size);
+  line-height: var(--font-body-large-line-height);
+  font-weight: var(--font-body-large-weight);
+  letter-spacing: var(--tracking-body-large);
+  margin: 0;
+}
+
+/* Body Medium -> Body2 */
+.rz-text-body2 {
+  font-family: var(--font-body-medium-family);
+  font-size: var(--font-body-medium-size);
+  line-height: var(--font-body-medium-line-height);
+  font-weight: var(--font-body-medium-weight);
+  letter-spacing: var(--tracking-body-medium);
+  margin: 0;
+}
+
+/* Label Large -> Button (Optional, typically handled by RadzenButton but good for Text) */
+.rz-text-button {
+  font-family: var(--font-label-large-family);
+  font-size: var(--font-label-large-size);
+  line-height: var(--font-label-large-line-height);
+  font-weight: var(--font-label-large-weight);
+  letter-spacing: var(--tracking-label-large);
 }
 
 html,
