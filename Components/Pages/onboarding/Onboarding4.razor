@@ -1,6 +1,9 @@
 @page "/onboarding/4"
+@using Radzen
+@using Radzen.Blazor
 @rendermode RenderMode.InteractiveServer
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <!-- Layout matches Figma Node 62:8180 -->
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" 
@@ -49,14 +52,20 @@
 </RadzenStack>
 
 @code {
-    void ConnectWallet()
+    async Task ConnectWallet()
     {
         // !TODO: Implement wallet connection logic
-        NavigationManager.NavigateTo("/home");
+        await CompleteOnboarding();
     }
 
-    void Skip()
+    async Task Skip()
     {
-        NavigationManager.NavigateTo("/home");
+        await CompleteOnboarding();
+    }
+
+    async Task CompleteOnboarding()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "hasVisited", "true");
+        NavigationManager.NavigateTo("/");
     }
 }

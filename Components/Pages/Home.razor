@@ -1,0 +1,87 @@
+@page "/"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+@if (isChecking)
+{
+    @* Loading state matches app background *@
+    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background-color: var(--material-theme-sys-light-background);">
+        <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+    </div>
+}
+else
+{
+    <!-- Main Container matching Figma #F9F9FF background -->
+    <RadzenStack Gap="1.5rem" Style="background-color: var(--material-theme-sys-light-background); min-height: 100vh; position: relative; padding: var(--screen-padding); padding-bottom: 5rem;w">
+        
+        <!-- Header Section -->
+        <RadzenStack Gap="0.7em">
+            <!-- Search Bar (Node 138:4686) -->
+            <div style="position: relative; width: 100%;">
+                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Style="margin: 0; width: 100%;" />
+                    <RadzenIcon Icon="search" Style="position: absolute; right: 1px; top: 50%; transform: translateY(-50%); background: var(--material-theme-sys-light-background); padding: 0 1rem;" />
+            </div>
+            <!-- Actions Row (Filter & Map) -->
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" >
+                <!-- Filter Chip (Node 137:4672) -->
+                <RadzenButton class="icon-filled" Text="Filter" Icon="filter_alt" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" />
+                <!-- Map Button (Node 138:4700) -->
+                <RadzenButton class="icon-filled" Text="Map" Icon="map" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat"
+                    Style="letter-spacing: 0.031rem; font-weight: 500;" />
+            </RadzenStack>
+
+        </RadzenStack>
+
+        <!-- Feed List (Node 136:4548) -->
+        <RadzenStack Gap="1rem">  
+            @foreach (var request in requests)
+            {
+                <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" />
+            }
+        </RadzenStack>
+
+        <!-- Bottom Navigation (Node 137:4598) -->
+        <Nav />
+
+    </RadzenStack>
+}
+
+@code {
+    private bool isChecking = true;
+
+    private class RequestItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Location { get; set; }
+    }
+
+    private List<RequestItem> requests = new()
+    {
+        new RequestItem { Id = 1, Title = "Help with gardening", Location = "Kraków" },
+        new RequestItem { Id = 2, Title = "Help with gardening", Location = "Kraków" }
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var hasVisited = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "hasVisited");
+
+            if (string.IsNullOrEmpty(hasVisited))
+            {
+                // First time visit
+                NavigationManager.NavigateTo("/onboarding/1");
+            }
+            else
+            {
+                // Already visited
+                isChecking = false;
+                StateHasChanged();
+            }
+        }
+    }
+}
