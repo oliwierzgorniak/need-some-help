@@ -5,6 +5,18 @@
 
 <PageTitle>Home</PageTitle>
 
+<style>
+    /* In case the component renders a body tag improperly or uses it as a root */
+    .map-container body {
+        height: 100%;
+    }
+    
+    /* Hide the available maps (layers) control */
+    .map-container .leaflet-control-layers {
+        display: none;
+    }
+</style>
+
 @if (isChecking)
 {
     @* Loading state matches app background *@
@@ -15,33 +27,43 @@
 else
 {
     <!-- Main Container matching Figma #F9F9FF background -->
-    <RadzenStack Gap="1.5rem" Style="background-color: var(--material-theme-sys-light-background); min-height: 100vh; position: relative; padding: var(--screen-padding); padding-bottom: 5rem;w">
+    <RadzenStack Gap="1.5rem" Style="@($"background-color: var(--material-theme-sys-light-background); position: relative; padding: var(--screen-padding); padding-bottom: 5rem; {(isMapMode ? "height: 100vh; overflow: hidden;" : "min-height: 100vh;")}")">
         
         <!-- Header Section -->
         <RadzenStack Gap="0.7em">
             <!-- Search Bar (Node 138:4686) -->
-            <div style="position: relative; width: 100%;">
-                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Style="margin: 0; width: 100%;" />
-                    <RadzenIcon Icon="search" Style="position: absolute; right: 1px; top: 50%; transform: translateY(-50%); background: var(--material-theme-sys-light-background); padding: 0 1rem;" />
-            </div>
             <!-- Actions Row (Filter & Map) -->
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" >
                 <!-- Filter Chip (Node 137:4672) -->
                 <RadzenButton class="icon-filled" Text="Filter" Icon="filter_alt" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" />
                 <!-- Map Button (Node 138:4700) -->
-                <RadzenButton class="icon-filled" Text="Map" Icon="map" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat"
+                <RadzenButton class="icon-filled" Click="@(() => isMapMode = !isMapMode)" Text="@(!isMapMode ? "Map" : "List")" Icon="@(!isMapMode ? "map" : "list")" ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat"
                     Style="letter-spacing: 0.031rem; font-weight: 500;" />
             </RadzenStack>
+            @if(!isMapMode){
+            <div style="position: relative; width: 100%;">
+                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Style="margin: 0; width: 100%;" />
+                    <RadzenIcon Icon="search" Style="position: absolute; right: 1px; top: 50%; transform: translateY(-50%); background: var(--material-theme-sys-light-background); padding: 0 1rem;" />
+            </div>
+            }
 
         </RadzenStack>
 
         <!-- Feed List (Node 136:4548) -->
+        @if(isMapMode) {
+             <div class="map-container" style="flex: 1;">
+                <RealTimeMap Height="100%" Width="100%" @ref="realTimeMap" Parameters="@mapParameters" OnAfterMapLoaded="@OnMapLoaded" OnClickMap="@OnMapClick">
+                    <!-- Add markers, layers, etc. via C# -->
+                </RealTimeMap>
+             </div>
+        } else {
         <RadzenStack Gap="1rem">  
             @foreach (var request in requests)
             {
                 <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" />
             }
         </RadzenStack>
+        }
 
         <!-- Bottom Navigation (Node 137:4598) -->
         <Nav />
@@ -55,8 +77,14 @@ else
     private class RequestItem
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Location { get; set; }
+        public required string Title { get; set; }
+        public required string Location { get; set; }
+    }
+
+    private class IpLocation
+    {
+        public double latitude { get; set; }
+        public double longitude { get; set; }
     }
 
     private List<RequestItem> requests = new()
@@ -75,6 +103,7 @@ else
             {
                 // First time visit
                 NavigationManager.NavigateTo("/onboarding/1");
+                return;
             }
             else
             {
@@ -82,6 +111,99 @@ else
                 isChecking = false;
                 StateHasChanged();
             }
+
+            // Fetch and set user location
+            try
+            {
+                @* var location = await JSRuntime.InvokeAsync<IpLocation>("getUserLocation"); *@
+                var location = new IpLocation() {longitude = 21.0122287, latitude = 52.2296756}; // Temporary hardcoded location (Warsaw) for testing
+                
+                if (location != null)
+                {
+                    // Update parameters for later initialization
+                    mapParameters.location.latitude = location.latitude;
+                    mapParameters.location.longitude = location.longitude;
+                    mapParameters.zoomLevel = 10;
+
+                    // If map is already initialized (e.g. user toggled quickly)
+                    if (realTimeMap != null)
+                    {
+                        realTimeMap.View.setCenter = new RealTimeMap.Location()
+                        {
+                            latitude = location.latitude,
+                            longitude = location.longitude
+                        };
+                        realTimeMap.View.setZoomLevel = 13;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching location: {ex.Message}");
+            }
+        }
+    }
+
+    private bool isMapMode = false;
+    RealTimeMap? realTimeMap;   
+     RealTimeMap.LoadParameters mapParameters = new RealTimeMap.LoadParameters()
+    {
+        location = new RealTimeMap.Location() { latitude = 0, longitude = 0 }, 
+        zoomLevel = 2
+    };
+    
+    private List<RealTimeMap.StreamPoint> points = new List<RealTimeMap.StreamPoint> {
+            new RealTimeMap.StreamPoint()
+            {
+                guid = Guid.NewGuid(),
+                // Slightly north of the hardcoded Warsaw location (52.2296756, 21.0122287)
+                latitude = 52.235, 
+                longitude = 21.0122287,
+                type = "Help Request",
+                value = "Gardening Help Needed",
+            }
+    };
+    
+    private async Task OnMapLoaded(RealTimeMap.MapEventArgs args)
+    {
+        if (args.sender != null)
+        {
+            // Set appearance to use a marker icon (Standard Leaflet marker)
+            args.sender.Geometric.Points.Appearance().pattern = new RealTimeMap.PointIcon()
+            {
+                iconUrl = "assets/location-marker.svg",
+                iconSize = new int[] { 31, 45 },
+            };
+
+            await args.sender.Geometric.Points.upload(points);
+        }
+    }
+
+    private async Task OnMapClick(RealTimeMap.ClicksMapArgs args)
+    {
+        var map = args.sender as RealTimeMap;
+        if (map == null) return;
+
+        var clickedLocation = new RealTimeMap.StreamPoint() 
+        { 
+            latitude = args.location.latitude, 
+            longitude = args.location.longitude 
+        };
+
+        // Find points within 500 meters (approx click area)
+        var nearbyPoints = map.Geometric.Points.getItems(point => 
+            map.Geometric.Computations.distance(
+                point, 
+                clickedLocation, 
+                RealTimeMap.UnitOfMeasure.meters
+            ) <= 500 
+        );
+        
+        if (nearbyPoints != null && nearbyPoints.Any())
+        {
+             var p = nearbyPoints.First();
+             // Simple interaction handling
+             await JSRuntime.InvokeVoidAsync("alert", $"Clicked on request: {p.value}");
         }
     }
 }
