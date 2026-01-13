@@ -1,0 +1,110 @@
+@page "/add-request"
+@using NeedSomeHelp.Components.Layout
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add Request</PageTitle>
+
+<RadzenStack Gap="0" Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); position: relative;">
+    <!-- Top Header Area with Back Button -->
+    <a href="/" style="position: fixed; top: 1rem; left: 1rem; cursor: pointer; z-index: 10">
+        <RadzenIcon Icon="arrow_back" Style="font-size: 2rem;" Click="@(() => NavigationManager.NavigateTo("/"))" />
+    </a>
+
+    <RadzenTemplateForm Data="@model">
+        <RadzenStack Gap="0.7rem" Style="padding: var(--screen-padding); padding: 0;">
+            <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" style="background-color: var(--material-theme-sys-light-secondary-container); padding: 4rem 2rem;">
+                <button onclick="@OnPhotoAdd" style="background: var(--material-theme-sys-light-secondary); cursor: pointer; border: none; border-radius: 50%; aspect-ratio: 1/1; padding: 1rem;">
+                  <RadzenIcon Icon="add" Style="font-size: 3rem; color: var(--material-theme-sys-light-on-secondary);" />
+                </button>
+                <input type="file" accept="image/*" style="display: none;" />
+                <RadzenText Text="Photo" TextStyle="TextStyle.H2" Style="color: var(--material-theme-sys-light-on-secondary-container)" />
+            </RadzenStack>
+            <!-- Inputs Section -->
+            <RadzenStack Gap="1rem" Style="padding: 0 var(--screen-padding);">
+                <!-- Title -->
+                <RadzenFormField Text="Title" Variant="Variant.Outlined" Style="width: 100%;">
+                    <RadzenTextBox @bind-Value="@model.Title" Name="Title" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="Title" Text="Title is required" />
+
+                <!-- Description -->
+                <RadzenStack Gap="0.5rem" AlignItems="AlignItems.End" style="display: flex; justify-content: flex-end;">
+                    <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width: 100%;">
+                        <RadzenTextArea @bind-Value="@model.Description" Name="Description" Rows="4" MaxLength="400" />
+                    </RadzenFormField>
+                    <RadzenText TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-surface-variant);">
+                        @(model.Description?.Length ?? 0)/400 max characters
+                    </RadzenText>
+                </RadzenStack>
+
+                <!-- Location -->
+                <RadzenStack Gap="0.7rem">
+                  <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                      <RadzenFormField Text="Location" Variant="Variant.Outlined" Style="flex: 1;">
+                          <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
+                      </RadzenFormField>
+                      <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="@GetLocation" Style="margin-top: 0.45rem"/>
+                  </RadzenStack>
+                  
+                  <!-- Is help remote? -->
+                  <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                      <RadzenCheckBox @bind-Value="@model.IsRemote" Name="IsRemote" />
+                      <RadzenLabel Text="Is help remote?" Component="IsRemote" Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                  </RadzenStack>
+                </RadzenStack>
+
+
+                <!-- Second Title / Phone Section (Per Design) -->
+                <!-- Assuming the label "Title" in design might be a placeholder, but implementing as requested. 
+                     The design shows another text field with label "Title" and a checkbox "I want to use my phone".
+                     This typically suggests a contact number field. -->
+                <RadzenStack Gap="0.7rem">
+                  <RadzenFormField Text="Title" Variant="Variant.Outlined" Style="width: 100%;">
+                      <RadzenTextBox @bind-Value="@model.SecondTitle" Name="SecondTitle" />
+                  </RadzenFormField>
+                  <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                      <RadzenCheckBox @bind-Value="@model.UsePhone" Name="UsePhone" />
+                      <RadzenLabel Text="I want to use my phone" Component="UsePhone" Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                  </RadzenStack>
+                </RadzenStack>
+
+            </RadzenStack>
+
+            <!-- Add Request Button -->
+            <!-- Positioning at bottom center as per design (approx) -->
+            <RadzenButton ButtonType="ButtonType.Submit" Text="ADD REQUEST" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Style="align-self: center; margin-top: 1.5rem; margin-bottom: 2rem;" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
+
+@code {
+    class RequestFormModel
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Location { get; set; } = "";
+        public bool IsRemote { get; set; }
+        public string SecondTitle { get; set; } = "";
+        public bool UsePhone { get; set; }
+    }
+
+    RequestFormModel model = new RequestFormModel();
+
+    void OnRequestSubmit(RequestFormModel args)
+    {
+        // TODO: Handle submission
+        Console.WriteLine($"Submitting: {args.Title}");
+        NavigationManager.NavigateTo("/");
+    }
+
+    void GetLocation()
+    {
+        // TODO: Implement geolocation fetch
+        model.Location = "Current Location"; // Placeholder
+    }
+
+    void OnPhotoAdd()
+    {
+        Console.WriteLine("Adding photo");
+    }
+}

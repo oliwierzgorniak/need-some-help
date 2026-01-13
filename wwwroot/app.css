@@ -5,12 +5,20 @@
   --material-theme-sys-light-on-primary: #ffffff;
 
   /* Additional colors for Onboarding 2 */
+  --material-theme-sys-light-secondary: #545f71;
+  --material-theme-sys-light-on-secondary: #ffffff;
   --material-theme-sys-light-secondary-container: #d8e3f8;
   --material-theme-sys-light-on-secondary-container: #3d4758;
   --material-theme-sys-light-tertiary: #6e5676;
   --material-theme-sys-light-on-tertiary: #ffffff;
 
+  --material-theme-sys-light-outline: #74777f;
   --material-theme-sys-light-outline-variant: #c3c6cf;
+
+  --material-theme-sys-light-on-surface: #191c20;
+  --material-theme-sys-light-on-surface-variant: #43474e;
+
+  --material-theme-sys-light-surface-dim: #d9dae0;
 
   /* Typography Variables from Figma */
 

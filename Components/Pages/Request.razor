@@ -1,8 +1,8 @@
-@page "/request/{Id:int}"
+@page "/request/{Id}"
 
 <h1>Request @Id</h1>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+            [Parameter]
+            public string Id { get; set; }
 }
