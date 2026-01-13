@@ -6,10 +6,10 @@
                     z-index: 1000;">
             
             <!-- Chat -->
-            <div style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; opacity: 0.74; color: var(--material-theme-sys-light-on-primary);">
+            <a href="/chats" style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; opacity: 0.74; color: var(--material-theme-sys-light-on-primary);">
                 <RadzenIcon class="icon-filled" Icon="chat" Style="font-size: 1.5rem; margin-bottom: 0px;" />
                 <RadzenText Text="Chat" TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-primary); margin: 0; letter-spacing: 0.025rem;" />
-            </div>
+            </a>
 
             <!-- Help (Active, no opacity) -->
             <div style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; color: var(--material-theme-sys-light-on-primary);">
@@ -23,10 +23,20 @@
                 <RadzenText Text="Request" TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-primary); margin: 0; letter-spacing: 0.025rem;" />
             </a>
 
-            <!-- Profile -->
-            <div style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; opacity: 0.74; color: var(--material-theme-sys-light-on-primary);">
-                <RadzenIcon class="icon-filled" Icon="person" Style="font-size: 1.5rem; margin-bottom: 0px;" />
-                <RadzenText Text="Profile" TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-primary); margin: 0; letter-spacing: 0.025rem;" />
-            </div>
+            <!-- Profile / Login -->
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/Identity/Account/Logout" style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; opacity: 0.74; color: var(--material-theme-sys-light-on-primary); text-decoration: none;">
+                        <RadzenIcon class="icon-filled" Icon="logout" Style="font-size: 1.5rem; margin-bottom: 0px;" />
+                        <RadzenText Text="Logout" TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-primary); margin: 0; letter-spacing: 0.025rem;" />
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/Identity/Account/Login" style="display: flex; flex-direction: column; align-items: center; width: 3.8125rem; cursor: pointer; opacity: 0.74; color: var(--material-theme-sys-light-on-primary); text-decoration: none;">
+                        <RadzenIcon class="icon-filled" Icon="login" Style="font-size: 1.5rem; margin-bottom: 0px;" />
+                        <RadzenText Text="Login" TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-primary); margin: 0; letter-spacing: 0.025rem;" />
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
 
         </RadzenStack>
