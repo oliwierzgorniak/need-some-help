@@ -1,0 +1,15 @@
+.profile-container {
+  padding: var(--screen-padding);
+  position: relative;
+  max-width: 100%;
+}
+
+.divider {
+  border-top: 1px solid #d8d8d8; /* Assuming based on svg */
+  width: 100%;
+  height: 1px;
+}
+
+.menu-list {
+  margin-top: 0.5rem;
+}

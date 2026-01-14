@@ -1,8 +1,66 @@
 @page "/request/{Id}"
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
 
-<h1>Request @Id</h1>
+<PageTitle>Request Details</PageTitle>
+
+
+<div class="request-container">
+    <a href="/" class="back-button">
+        <RadzenIcon Icon="arrow_back" class="back-icon" />
+    </a>
+    <RadzenImage Path="assets/requests/1.png" class="image" />
+    <RadzenStack Gap="1.1rem" class="content-stack">
+        <RadzenStack Gap="0.25rem">
+            <RadzenText Text="Added: 29.12.2025" TextStyle="TextStyle.Body2" class="date-text" />
+            <RadzenText Text="Painting a bedroom" TextStyle="TextStyle.H4" class="title" />
+        </RadzenStack>
+        <div class="divider"></div>
+        <RadzenText Text="I have all the items needed, but I don’t have enough strength to paint my room for myself"
+            TextStyle="TextStyle.Body1" class="description-text" />
+        <div class="divider"></div>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.7rem">
+            <RadzenImage Path="assets/users/1.png" class="avatar" />
+            <RadzenStack Gap="0.4rem" class="user-info-flex">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.7rem" AlignItems="AlignItems.Center">
+                    <RadzenText Text="Josephine" TextStyle="TextStyle.H5" TagName="TagName.H2" class="user-name" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.15rem"
+                        Style="cursor: pointer;">
+                        <RadzenIcon Icon="flag" class="report-icon icon-filled" />
+                        <RadzenText Text="Report" TextStyle="TextStyle.Caption" class="report-text" />
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.45rem">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.15rem">
+                        <RadzenIcon Icon="star" class="star-icon" />
+                        <RadzenText Text="4.9" TextStyle="TextStyle.Body1" class="rating-text" />
+                    </RadzenStack>
+                    <RadzenText Text="22 reviews" TextStyle="TextStyle.Caption" class="reviews-text" />
+                </RadzenStack>
+                <RadzenText Text="Last login: today" TextStyle="TextStyle.Body2" class="login-text" />
+            </RadzenStack>
+        </RadzenStack>
+        <div class="divider"></div>
+        <RadzenStack Gap="0.5rem">
+            <RadzenText Text="Location" TextStyle="TextStyle.H5" class="location-title" />
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+                AlignItems="AlignItems.Center">
+                <RadzenText Text="Lincoln Street 8, Brussels, Belgium" TextStyle="TextStyle.Body2"
+                    class="address-text" />
+            </RadzenStack>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.6rem"
+            class="action-buttons-container">
+            <RadzenButton Icon="ios_share" class="action-btn share-btn" />
+            <RadzenButton Icon="phone" class="action-btn phone-btn" />
+            <RadzenButton Icon="message" class="action-btn message-btn" />
+        </RadzenStack>
+    </RadzenStack>
+
+</div>
 
 @code {
-            [Parameter]
-            public string Id { get; set; }
+    [Parameter]
+    public string Id { get; set; }
 }

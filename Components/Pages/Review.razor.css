@@ -1,0 +1,43 @@
+.review-container {
+  padding: var(--screen-padding);
+  padding-bottom: 3rem;
+}
+
+.back-button ::deep i {
+  font-size: 2.3rem;
+}
+
+::deep .header-section {
+  margin-top: 1.7rem;
+}
+
+::deep .avatar-image {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: 50%; /* Rounded as per 31px radius on 49px box */
+}
+
+::deep .user-name {
+  font-weight: 500;
+}
+
+::deep .rating-control {
+  margin-top: 1.5rem;
+}
+
+::deep .review-input {
+  width: 100%;
+  resize: none;
+  aspect-ratio: 4/2;
+  margin: 0.5rem 0;
+}
+
+::deep .review-button {
+  margin: 0 auto;
+  display: block;
+  position: fixed;
+  bottom: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+}

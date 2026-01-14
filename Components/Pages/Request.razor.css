@@ -1,0 +1,89 @@
+.request-container {
+  padding-bottom: 2rem;
+}
+
+.back-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  cursor: pointer;
+}
+
+.image {
+  background-color: #f1f1f1;
+  height: 13.125rem;
+  width: 100%;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.content-stack {
+  padding: 1.5rem 1.25rem;
+}
+
+.divider {
+  border-top: 0.0625rem solid #e0e0e0;
+  width: 100%;
+}
+
+.avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+}
+
+.user-info-flex {
+  flex: 1;
+}
+
+.report-text {
+  color: var(--material-theme-sys-light-error);
+  cursor: pointer;
+}
+
+.report-icon {
+  color: var(--material-theme-sys-light-error);
+  font-size: 1rem;
+}
+
+.star-icon {
+  font-size: 1rem;
+}
+
+.rating-text {
+  line-height: 1;
+}
+
+.reviews-text {
+  color: var(--material-theme-sys-light-secondary);
+  line-height: 1;
+}
+
+.login-text {
+  color: var(--material-theme-sys-light-secondary);
+}
+
+.location-title {
+  font-weight: 600;
+}
+
+.action-buttons-container {
+  margin-top: 1rem;
+  background-color: var(--material-theme-sys-light-background);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem var(--screen-padding);
+}
+
+.share-btn,
+.phone-btn {
+  width: 25%;
+}
+
+.message-btn {
+  width: 50%;
+}

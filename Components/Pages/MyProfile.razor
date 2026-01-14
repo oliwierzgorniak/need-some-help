@@ -1,0 +1,15 @@
+@page "/my-profile"
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
+@using NeedSomeHelp.Components.Pages.profile
+
+<PageTitle>My Profile</PageTitle>
+
+<div class="profile-container">
+  <RadzenStack Gap="0" class="menu-list">
+    <Header UserId="1" />
+    <Link Url="@($"/profile/wallet")" IconText="wallet" Text="Your wallet" />
+  </RadzenStack>
+</div>
+<Nav></Nav>

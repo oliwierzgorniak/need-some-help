@@ -1,0 +1,26 @@
+@page "/profile/{UserId}"
+@inject NavigationManager NavigationManager
+@using Radzen
+@using Radzen.Blazor
+@using NeedSomeHelp.Components.Pages.profile
+
+<PageTitle>Profile</PageTitle>
+
+<div class="profile-container">
+  <a href="/chats" class="back-button">
+    <RadzenIcon Icon="arrow_back" />
+  </a>
+  <RadzenStack Gap="0" class="menu-list">
+    <Header UserId="@UserId" />
+    <Link Url="@($"/profile/{UserId}/review")" IconText="stars" Text="Give review" />
+    <div class="divider"></div>
+    <Link Url="@($"/profile/{UserId}/tip")" IconText="attach_money" Text="Send tip" />
+    <div class="divider"></div>
+    <Link Url="@($"/profile/{UserId}/reviews")" IconText="reviews" Text="Read reviews" />
+  </RadzenStack>
+</div>
+
+@code {
+  [Parameter]
+  public string UserId { get; set; }
+}

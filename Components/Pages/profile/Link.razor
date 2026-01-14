@@ -1,0 +1,17 @@
+
+    <a href="@Url" class="menu-content">
+      <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+        <RadzenIcon Icon="@IconText" class="menu-icon icon-filled" />
+        <RadzenText Text="@Text" class="menu-text" TextStyle="TextStyle.H5" />
+      </RadzenStack>
+      <RadzenIcon Icon="arrow_forward_ios" class="arrow-icon" />
+    </a>
+
+    @code {
+      [Parameter]
+      public string Url { get; set; } = "/review/1";
+      [Parameter]
+      public string IconText { get; set; } = "stars";
+      [Parameter]
+      public string Text { get; set; } = "Give review";
+    }

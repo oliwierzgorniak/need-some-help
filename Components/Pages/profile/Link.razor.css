@@ -1,0 +1,25 @@
+.menu-content {
+  padding: 1rem 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* .menu-icon {
+  font-size: 1.7rem; 
+  color: black;
+}
+
+.menu-text {
+  font-weight: 500;
+  font-size: 1.2rem;
+  color: black;
+  margin: 0;
+}
+
+.arrow-icon {
+  font-size: 1.4rem; 
+  color: black;
+} */

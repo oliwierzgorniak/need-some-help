@@ -20,6 +20,8 @@
 
   --material-theme-sys-light-surface-dim: #d9dae0;
 
+  --material-theme-sys-light-error: #ba1a1a;
+
   /* Typography Variables from Figma */
 
   /* Headline Small: Roboto Regular  */
@@ -79,42 +81,42 @@
 
 /* Headline Large -> H3 (or whichever standard you prefer, H4 is 32px in M3 usually) */
 /* We will hijack H4 for Headline Large (32px) */
-.rz-text-h2 {
+/* .rz-text-h2 {
   font-family: var(--font-headline-small-family);
   font-size: var(--font-headline-small-size);
   line-height: var(--font-headline-small-line-height);
   font-weight: var(--font-headline-small-weight);
   margin: 0;
-}
+} */
 
 /* Body Large -> Body1 */
-.rz-text-body1 {
+/* .rz-text-body1 {
   font-family: var(--font-body-large-family);
   font-size: var(--font-body-large-size);
   line-height: var(--font-body-large-line-height);
   font-weight: var(--font-body-large-weight);
   letter-spacing: var(--tracking-body-large);
   margin: 0;
-}
+} */
 
 /* Body Medium -> Body2 */
-.rz-text-body2 {
+/* .rz-text-body2 {
   font-family: var(--font-body-medium-family);
   font-size: var(--font-body-medium-size);
   line-height: var(--font-body-medium-line-height);
   font-weight: var(--font-body-medium-weight);
   letter-spacing: var(--tracking-body-medium);
   margin: 0;
-}
+} */
 
 /* Label Large -> Button (Optional, typically handled by RadzenButton but good for Text) */
-.rz-text-button {
+/* .rz-text-button {
   font-family: var(--font-label-large-family);
   font-size: var(--font-label-large-size);
   line-height: var(--font-label-large-line-height);
   font-weight: var(--font-label-large-weight);
   letter-spacing: var(--tracking-label-large);
-}
+} */
 
 a {
   color: inherit;
