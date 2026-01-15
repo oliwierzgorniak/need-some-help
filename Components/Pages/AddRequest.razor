@@ -18,8 +18,8 @@
 
 
 <div class="page-container">
-    <a href="/" class="back-button-container">
-        <RadzenIcon Icon="arrow_back" class="back-icon" Click="@(() => NavigationManager.NavigateTo("/"))" />
+    <a href="/" class="arrow-back">
+        <RadzenIcon Icon="arrow_back" Click="@(() => NavigationManager.NavigateTo("/"))" />
     </a>
     <RadzenTemplateForm Data="@model" Submit="@(async (RequestFormModel args) => await OnRequestSubmit(args))">
         <RadzenStack Gap="0.7rem" class="form-wrapper">

@@ -3,7 +3,7 @@
   background-color: var(--material-theme-sys-light-background);
 }
 
-.back-button-container {
+.arrow-back {
   position: fixed;
   top: 1rem;
   left: 1rem;
@@ -11,8 +11,8 @@
   z-index: 10;
 }
 
-.back-icon {
-  font-size: 2rem;
+.arrow-back ::deep i {
+  font-size: var(--arrow-back-font-size);
 }
 
 ::deep .form-wrapper {
