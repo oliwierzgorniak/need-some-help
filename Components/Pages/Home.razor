@@ -74,7 +74,8 @@ else
             <RadzenStack Gap="1rem">
                 @foreach (var request in requests)
                 {
-                    <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" />
+                    <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
+                        PhotoUrl="@request.PhotoUrl" />
                 }
             </RadzenStack>
         }
@@ -93,6 +94,7 @@ else
         public int Id { get; set; }
         public required string Title { get; set; }
         public required string Location { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 
     private class IpLocation
@@ -107,14 +109,15 @@ else
     {
         // Fetch HelpRequests from the database
         var dbRequests = await DbContext.HelpRequests
-            .OrderByDescending(r => r.CreatedAt)
-            .ToListAsync();
+        .OrderByDescending(r => r.CreatedAt)
+        .ToListAsync();
 
-        requests = dbRequests.Select(r => new RequestItem 
-        { 
-            Id = r.Id, 
-            Title = r.Title, 
-            Location = r.Location 
+        requests = dbRequests.Select(r => new RequestItem
+        {
+            Id = r.Id,
+            Title = r.Title,
+            Location = r.Location,
+            PhotoUrl = r.PhotoUrl
         }).ToList();
     }
 

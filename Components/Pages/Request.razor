@@ -2,6 +2,14 @@
 @inject NavigationManager NavigationManager
 @using Radzen
 @using Radzen.Blazor
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using NeedSomeHelp.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
 
 <PageTitle>Request Details</PageTitle>
 
@@ -12,21 +20,31 @@
     @* <a href="/" class="back-button">
         <RadzenIcon Icon="arrow_back" class="back-icon" />
     </a> *@
-    <RadzenImage Path="assets/requests/1.png" class="image" />
+    @if (request != null)
+    {
+        <RadzenImage Path="@(string.IsNullOrEmpty(request.PhotoUrl) ? "assets/requests/1.png" : request.PhotoUrl)"
+            class="image" Style="object-fit: cover;" />
+    }
+    else
+    {
+        <div class="image" style="background-color: #eee;"></div>
+    }
     <RadzenStack Gap="1.1rem" class="content-stack">
         <RadzenStack Gap="0.25rem">
-            <RadzenText Text="Added: 29.12.2025" TextStyle="TextStyle.Body2" class="date-text" />
-            <RadzenText Text="Painting a bedroom" TextStyle="TextStyle.H4" class="title" />
+            <RadzenText Text="@($"Added: {request?.CreatedAt.ToString("dd.MM.yyyy") ?? "Loading..."}")"
+                TextStyle="TextStyle.Body2" class="date-text" />
+            <RadzenText Text="@(request?.Title ?? "Loading...")" TextStyle="TextStyle.H4" class="title" />
         </RadzenStack>
         <div class="divider"></div>
-        <RadzenText Text="I have all the items needed, but I don’t have enough strength to paint my room for myself"
-            TextStyle="TextStyle.Body1" class="description-text" />
+        <RadzenText Text="@(request?.Description ?? "Loading...")" TextStyle="TextStyle.Body1"
+            class="description-text" />
         <div class="divider"></div>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.7rem">
             <RadzenImage Path="assets/users/1.png" class="avatar" />
             <RadzenStack Gap="0.4rem" class="user-info-flex">
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.7rem" AlignItems="AlignItems.Center">
-                    <RadzenText Text="Josephine" TextStyle="TextStyle.H5" TagName="TagName.H2" class="user-name" />
+                    <RadzenText Text="@(owner?.Name ?? owner?.UserName ?? "User")" TextStyle="TextStyle.H5"
+                        TagName="TagName.H2" class="user-name" />
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.15rem"
                         Style="cursor: pointer;">
                         <RadzenIcon Icon="flag" class="report-icon icon-filled" />
@@ -48,7 +66,7 @@
             <RadzenText Text="Location" TextStyle="TextStyle.H5" class="location-title" />
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
                 AlignItems="AlignItems.Center">
-                <RadzenText Text="Lincoln Street 8, Brussels, Belgium" TextStyle="TextStyle.Body2"
+                <RadzenText Text="@(request?.Location ?? "Unknown Location")" TextStyle="TextStyle.Body2"
                     class="address-text" />
             </RadzenStack>
         </RadzenStack>
@@ -56,7 +74,7 @@
             class="action-buttons-container">
             <RadzenButton Icon="ios_share" class="action-btn share-btn" />
             <RadzenButton Icon="phone" class="action-btn phone-btn" />
-            <RadzenButton Icon="message" class="action-btn message-btn" />
+            <RadzenButton Icon="message" class="action-btn message-btn" Click="@OnMessageClick" />
         </RadzenStack>
     </RadzenStack>
 
@@ -64,5 +82,63 @@
 
 @code {
     [Parameter]
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
+
+    private HelpRequest? request;
+    private ApplicationUser? owner;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (int.TryParse(Id, out int requestId))
+        {
+            request = await DbContext.HelpRequests
+            .Include(r => r.Owner)
+            .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request != null)
+            {
+                owner = request.Owner;
+            }
+        }
+    }
+
+    async Task OnMessageClick()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            NavigationManager.NavigateTo("Identity/Account/Login", true);
+            return;
+        }
+
+        if (request != null)
+        {
+            var userId = UserManager.GetUserId(user);
+
+            // Don't let users message themselves
+            if (userId == request.OwnerId)
+            {
+                NavigationManager.NavigateTo("/chats");
+                return;
+            }
+
+            var currentUser = await DbContext.Users
+            .Include(u => u.ContactedHelpRequests)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (currentUser != null)
+            {
+                // Check if already contacted
+                if (!currentUser.ContactedHelpRequests.Any(r => r.Id == request.Id))
+                {
+                    currentUser.ContactedHelpRequests.Add(request);
+                    await DbContext.SaveChangesAsync();
+                }
+
+                NavigationManager.NavigateTo("/chats");
+            }
+        }
+    }
 }

@@ -4,6 +4,10 @@
   max-width: 100%;
 }
 
+.back-button ::deep i {
+  font-size: var(--arrow-back-font-size);
+}
+
 .divider {
   border-top: 1px solid #d8d8d8; /* Assuming based on svg */
   width: 100%;

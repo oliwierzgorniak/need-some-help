@@ -1,0 +1,42 @@
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--rz-primary);
+  color: var(--rz-on-primary);
+  z-index: 10;
+  padding: 1rem 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+::deep .nav-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 4rem;
+  gap: 0.3em;
+  opacity: 0.74;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin: 0;
+}
+
+::deep .nav-item:hover,
+::deep .nav-item.active {
+  opacity: 1;
+}
+
+::deep .nav-text,
+::deep .nav-icon {
+  color: var(--rz-on-primary);
+}
+
+::deep .nav-text {
+  margin: 0;
+}

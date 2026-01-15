@@ -3,94 +3,90 @@
 @using NeedSomeHelp.Data
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components.Authorization
+@using Azure.Storage.Blobs
+@using Azure.Storage.Blobs.Models
+@using Azure.Storage.Sas
+@using Azure
+@using System.IO
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IConfiguration Configuration
 
 <PageTitle>Add Request</PageTitle>
 
-<RadzenStack Gap="0"
-    Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); position: relative;">
-    <!-- Top Header Area with Back Button -->
-    <a href="/" style="position: fixed; top: 1rem; left: 1rem; cursor: pointer; z-index: 10">
-        <RadzenIcon Icon="arrow_back" Style="font-size: 2rem;" Click="@(() => NavigationManager.NavigateTo("/"))" />
+
+<div class="page-container">
+    <a href="/" class="back-button-container">
+        <RadzenIcon Icon="arrow_back" class="back-icon" Click="@(() => NavigationManager.NavigateTo("/"))" />
     </a>
     <RadzenTemplateForm Data="@model" Submit="@(async (RequestFormModel args) => await OnRequestSubmit(args))">
-        <RadzenStack Gap="0.7rem" Style="padding: var(--screen-padding); padding: 0;">
+        <RadzenStack Gap="0.7rem" class="form-wrapper">
             <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
-                style="background-color: var(--material-theme-sys-light-secondary-container); padding: 4rem 2rem;">
-                <button onclick="@OnPhotoAdd"
-                    style="background: var(--material-theme-sys-light-secondary); cursor: pointer; border: none; border-radius: 50%; aspect-ratio: 1/1; padding: 1rem;">
-                    <RadzenIcon Icon="add"
-                        Style="font-size: 3rem; color: var(--material-theme-sys-light-on-secondary);" />
-                </button>
-                <input type="file" accept="image/*" style="display: none;" />
-                <RadzenText Text="Photo" TextStyle="TextStyle.H4"
-                    Style="color: var(--material-theme-sys-light-on-secondary-container)" />
+                class="photo-upload-area" Style="@($"background-image: url('{model.PhotoUrl}');")">
+                <label class="upload-label">
+                    <InputFile OnChange="@UploadPhoto" accept="image/*" class="upload-input" />
+                    @if (isUploading)
+                    {
+                        <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"
+                            Size="ProgressBarCircularSize.Medium" class="upload-spinner" />
+                    }
+                    else
+                    {
+                        <RadzenIcon Icon="add" class="upload-icon" />
+                    }
+                </label>
+
+                <RadzenText Text="Photo" TextStyle="TextStyle.H4" class="photo-text" />
             </RadzenStack>
-            <!-- Inputs Section -->
-            <RadzenStack Gap="1rem" Style="padding: 0 var(--screen-padding);">
+            <RadzenStack Gap="1rem" class="inputs-section">
                 <!-- Title -->
-                <RadzenFormField Text="Title" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenFormField Text="Title" Variant="Variant.Outlined" class="full-width">
                     <RadzenTextBox @bind-Value="@model.Title" Name="Title" />
                 </RadzenFormField>
                 <RadzenRequiredValidator Component="Title" Text="Title is required" />
-
                 <!-- Description -->
-                <RadzenStack Gap="0.5rem" AlignItems="AlignItems.End" style="display: flex; justify-content: flex-end;">
-                    <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenStack Gap="0.5rem" AlignItems="AlignItems.End" class="description-wrapper">
+                    <RadzenFormField Text="Description" Variant="Variant.Outlined" class="full-width">
                         <RadzenTextArea @bind-Value="@model.Description" Name="Description" Rows="4" MaxLength="400" />
                     </RadzenFormField>
-                    <RadzenText TextStyle="TextStyle.Caption"
-                        Style="color: var(--material-theme-sys-light-on-surface-variant);">
+                    <RadzenText TextStyle="TextStyle.Caption" class="char-count">
                         @(model.Description?.Length ?? 0)/400 max characters
                     </RadzenText>
                 </RadzenStack>
-
                 <!-- Location -->
                 <RadzenStack Gap="0.7rem">
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
-                        <RadzenFormField Text="Location" Variant="Variant.Outlined" Style="flex: 1;">
+                        <RadzenFormField Text="Location" Variant="Variant.Outlined" class="location-field">
                             <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
                         </RadzenFormField>
                         <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
-                            Click="@GetLocation" Style="margin-top: 0.45rem" />
+                            Click="@GetLocation" class="location-button" />
                     </RadzenStack>
-
                     <!-- Is help remote? -->
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                         <RadzenCheckBox @bind-Value="@model.IsRemote" Name="IsRemote" />
-                        <RadzenLabel Text="Is help remote?" Component="IsRemote"
-                            Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                        <RadzenLabel Text="Is help remote?" Component="IsRemote" class="checkbox-label" />
                     </RadzenStack>
                 </RadzenStack>
-
-
-                <!-- Second Title / Phone Section (Per Design) -->
-                <!-- Assuming the label "Title" in design might be a placeholder, but implementing as requested. 
-                     The design shows another text field with label "Title" and a checkbox "I want to use my phone".
-                     This typically suggests a contact number field. -->
+                <!-- Phone Section -->
                 <RadzenStack Gap="0.7rem">
-                    <RadzenFormField Text="Phone" Variant="Variant.Outlined" Style="width: 100%;">
+                    <RadzenFormField Text="Phone" Variant="Variant.Outlined" class="full-width">
                         <RadzenTextBox @bind-Value="@model.PhoneNumber" Name="PhoneNumber" />
                     </RadzenFormField>
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                         <RadzenCheckBox @bind-Value="@model.UseMyPhone" Name="UseMyPhone" />
-                        <RadzenLabel Text="I want to use my phone" Component="UseMyPhone"
-                            Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                        <RadzenLabel Text="I want to use my phone" Component="UseMyPhone" class="checkbox-label" />
                     </RadzenStack>
                 </RadzenStack>
-
             </RadzenStack>
-
             <!-- Add Request Button -->
-            <!-- Positioning at bottom center as per design (approx) -->
-            <RadzenButton ButtonType="ButtonType.Submit" Text="ADD REQUEST" ButtonStyle="ButtonStyle.Primary"
-                Variant="Variant.Flat" Style="align-self: center; margin-top: 1.5rem; margin-bottom: 2rem;" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Add request" ButtonStyle="ButtonStyle.Primary"
+                Variant="Variant.Flat" class="submit-button" />
         </RadzenStack>
     </RadzenTemplateForm>
-</RadzenStack>
+</div>
 
 @code {
     class RequestFormModel
@@ -101,9 +97,80 @@
         public bool IsRemote { get; set; }
         public string PhoneNumber { get; set; } = "";
         public bool UseMyPhone { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 
     RequestFormModel model = new RequestFormModel();
+    bool isUploading = false;
+
+    async Task UploadPhoto(InputFileChangeEventArgs e)
+    {
+        isUploading = true;
+        try
+        {
+            var file = e.File;
+            var format = "image/jpeg";
+            var resizedImageFile = await file.RequestImageFileAsync(format, 1000, 1000);
+
+            var blobServiceClient = new BlobServiceClient(Configuration["Azure:Storage:ConnectionString"]);
+            var containerClient = blobServiceClient.GetBlobContainerClient("requests");
+
+            bool isPrivate = false;
+            try
+            {
+                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+            }
+            catch (RequestFailedException ex) when (ex.ErrorCode == "PublicAccessNotPermitted")
+            {
+                // Storage account doesn't support public access. Create private container.
+                isPrivate = true;
+                await containerClient.CreateIfNotExistsAsync();
+            }
+
+            // Double check existing container properties if we didn't catch an exception (in case it already existed as private)
+            if (!isPrivate && await containerClient.ExistsAsync())
+            {
+                var properties = await containerClient.GetPropertiesAsync();
+                if (properties.Value.PublicAccess == PublicAccessType.None)
+                {
+                    isPrivate = true;
+                }
+            }
+
+            var blobName = $"{Guid.NewGuid()}.jpg";
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB max
+            await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = format });
+
+            if (isPrivate)
+            {
+                // Generate a SAS token valid for 5 years for simple public access
+                var sasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = containerClient.Name,
+                    BlobName = blobName,
+                    Resource = "b",
+                    ExpiresOn = DateTimeOffset.UtcNow.AddYears(5)
+                };
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+                var sasUri = blobClient.GenerateSasUri(sasBuilder);
+                model.PhotoUrl = sasUri.ToString();
+            }
+            else
+            {
+                model.PhotoUrl = blobClient.Uri.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading photo: {ex.Message}");
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
 
     async Task OnRequestSubmit(RequestFormModel args)
     {
@@ -124,6 +191,7 @@
                     Location = args.Location,
                     PhoneNumber = args.UseMyPhone ? currentUser.PhoneNumber : args.PhoneNumber,
                     OwnerId = currentUser.Id,
+                    PhotoUrl = args.PhotoUrl,
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -143,10 +211,5 @@
     {
         // TODO: Implement geolocation fetch
         model.Location = "Current Location"; // Placeholder
-    }
-
-    void OnPhotoAdd()
-    {
-        Console.WriteLine("Adding photo");
     }
 }

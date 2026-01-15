@@ -6,4 +6,6 @@ namespace NeedSomeHelp.Data;
 public class ApplicationUser : IdentityUser
 {
     public string? Name { get; set; }
+    
+    public virtual ICollection<HelpRequest> ContactedHelpRequests { get; set; } = new List<HelpRequest>();
 }

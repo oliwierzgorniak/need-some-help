@@ -2,46 +2,104 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @using NeedSomeHelp.Data
+@using NeedSomeHelp.Components.Pages
+@using NeedSomeHelp.Components.Layout
 @attribute [Authorize]
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
 
 <PageTitle>Chats</PageTitle>
 
-<RadzenText TextStyle="TextStyle.H3">Welcome to the Chats Page!</RadzenText>
-
-@if (!string.IsNullOrEmpty(userName))
-{
-    <p>Hi <strong>@userName</strong>!</p>
-}
-else
-{
-    <p>LOADING...</p>
-}
+<div class="scroll-content">
+    <RadzenStack Gap="1rem">
+        @if (isLoading)
+        {
+            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
+                class="loading-spinner" />
+        }
+        else if (!chatItems.Any())
+        {
+            <RadzenText Text="No active chats." TextStyle="TextStyle.Body1" class="empty-state-text" />
+        }
+        else
+        {
+            @foreach (var chat in chatItems)
+            {
+                <a href="@($"chat/{chat.OtherUserId}")" class="chat-link">
+                    <RadzenStack Gap="0.2rem" class="text-content">
+                        <RadzenText Text="@chat.OtherUserName" TextStyle="TextStyle.H5" class="user-name" />
+                        <RadzenText Text="@chat.RequestTitle" TextStyle="TextStyle.Body2" class="request-title" />
+                    </RadzenStack>
+                    <a href="@($"profile/{chat.OtherUserId}")">
+                        <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Primary" class="icon-button" />
+                    </a>
+                </a>
+                <div class="divider"></div>
+            }
+        }
+    </RadzenStack>
+</div>
+<Nav Section="chats" />
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+    private bool isLoading = true;
+    private List<ChatItem> chatItems = new();
 
-    private string? userName;
+    private class ChatItem
+    {
+        public string OtherUserId { get; set; } = string.Empty;
+        public string OtherUserName { get; set; } = "Unknown";
+        public string RequestTitle { get; set; } = string.Empty;
+        public int RequestId { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        if (authenticationStateTask is not null)
-        {
-            var authState = await authenticationStateTask;
-            var user = authState.User;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-            if (user.Identity is not null && user.Identity.IsAuthenticated)
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userId = UserManager.GetUserId(user);
+            if (!string.IsNullOrEmpty(userId))
             {
-                var currentUser = await UserManager.GetUserAsync(user);
-                userName = currentUser?.Name ?? user.Identity.Name;
+                // 1. Get requests I contacted (I am the helper, User is the Owner)
+                // We need to fetch the User (me) and Include ContactedHelpRequests -> ThenInclude Owner
+                var myContactedData = await DbContext.Users
+                .Where(u => u.Id == userId)
+                .Include(u => u.ContactedHelpRequests)
+                .ThenInclude(r => r.Owner)
+                .SelectMany(u => u.ContactedHelpRequests)
+                .Select(r => new ChatItem
+                {
+                    OtherUserId = r.OwnerId,
+                    OtherUserName = r.Owner.Name ?? r.Owner.UserName ?? "User",
+                    RequestTitle = r.Title,
+                    RequestId = r.Id
+                })
+                .ToListAsync();
+
+                // 2. Get requests I own that have been contacted (I am the owner, User is the helper)
+                var requestsIOwnData = await DbContext.HelpRequests
+                .Where(r => r.OwnerId == userId)
+                .Include(r => r.ContactedByUsers)
+                .SelectMany(r => r.ContactedByUsers.Select(u => new ChatItem
+                {
+                    OtherUserId = u.Id,
+                    OtherUserName = u.Name ?? u.UserName ?? "User",
+                    RequestTitle = r.Title,
+                    RequestId = r.Id
+                }))
+                .ToListAsync();
+
+                chatItems = myContactedData.Concat(requestsIOwnData).ToList();
             }
         }
+        isLoading = false;
     }
-} 
-
-
+}

@@ -80,5 +80,4 @@ node_modules/
 # Anima
 .anima/
 
-appsettings-old.json
 appsettings.json

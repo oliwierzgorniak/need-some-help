@@ -2,7 +2,7 @@
     <RadzenStack Gap="0.625em"
         Style="background-color: var(--material-theme-sys-light-surface); border: 1px solid var(--material-theme-sys-light-outline-variant); border-radius: 0.25rem; padding: 0.625rem;">
         <!-- Image Container -->
-        <RadzenImage Path="@($"assets/requests/{Id}.png")"
+        <RadzenImage Path="@(string.IsNullOrEmpty(PhotoUrl) ? "assets/request-no-picture.jpg" : PhotoUrl)"
             Style="width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 0.25rem;"
             AlternateText="Help request image" />
         <!-- Content -->
@@ -24,4 +24,7 @@
 
     [Parameter]
     public int Id { get; set; } = 0;
+
+    [Parameter]
+    public string? PhotoUrl { get; set; }
 }

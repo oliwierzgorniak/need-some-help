@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeedSomeHelp.Data;
 
@@ -11,9 +12,11 @@ using NeedSomeHelp.Data;
 namespace NeedSomeHelp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115084601_AddPhotoUrlToHelpRequest")]
+    partial class AddPhotoUrlToHelpRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace NeedSomeHelp.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ContactedHelpRequests", b =>
-                {
-                    b.Property<int>("ContactedHelpRequestsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ContactedByUsersId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ContactedHelpRequestsId");
-
-                    b.HasIndex("ContactedByUsersId");
-
-                    b.ToTable("ContactedHelpRequests");
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -268,9 +256,6 @@ namespace NeedSomeHelp.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhotoUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -312,20 +297,6 @@ namespace NeedSomeHelp.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("ContactedHelpRequests", b =>
-                {
-                    b.HasOne("NeedSomeHelp.Data.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ContactedByUsersId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("NeedSomeHelp.Data.HelpRequest", null)
-                        .WithMany()
-                        .HasForeignKey("ContactedHelpRequestsId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

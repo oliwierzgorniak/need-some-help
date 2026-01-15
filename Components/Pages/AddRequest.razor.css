@@ -1,0 +1,94 @@
+.page-container {
+  min-height: 100vh;
+  background-color: var(--material-theme-sys-light-background);
+}
+
+.back-button-container {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.back-icon {
+  font-size: 2rem;
+}
+
+::deep .form-wrapper {
+  padding: 0;
+}
+
+::deep .photo-upload-area {
+  background-color: var(--material-theme-sys-light-secondary-container);
+  padding: 4rem 2rem;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.upload-label {
+  background: var(--material-theme-sys-light-secondary);
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+::deep .upload-input {
+  display: none;
+}
+
+::deep .upload-spinner {
+  color: var(--material-theme-sys-light-on-secondary);
+}
+
+::deep .upload-icon {
+  font-size: 3rem;
+  color: var(--material-theme-sys-light-on-secondary);
+}
+
+::deep .photo-text {
+  color: var(--material-theme-sys-light-on-secondary-container);
+}
+
+::deep .inputs-section {
+  padding: 0 var(--screen-padding);
+}
+
+::deep .full-width {
+  width: 100%;
+}
+
+::deep .description-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+::deep .char-count {
+  color: var(--material-theme-sys-light-on-surface-variant);
+}
+
+::deep .location-field {
+  flex: 1;
+}
+
+::deep .location-button {
+  margin-top: 0.45rem;
+}
+
+::deep .checkbox-label {
+  color: var(--material-theme-sys-light-on-surface-variant);
+}
+
+::deep .submit-button {
+  align-self: center;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}

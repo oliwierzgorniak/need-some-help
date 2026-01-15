@@ -18,11 +18,15 @@ public class HelpRequest
 
     public string? PhoneNumber { get; set; }
 
+    public string? PhotoUrl { get; set; }
+
     [Required]
     public string OwnerId { get; set; }
 
     [ForeignKey(nameof(OwnerId))]
     public ApplicationUser Owner { get; set; } = null!;
+
+    public virtual ICollection<ApplicationUser> ContactedByUsers { get; set; } = new List<ApplicationUser>();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
