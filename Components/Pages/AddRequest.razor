@@ -1,23 +1,33 @@
 @page "/add-request"
 @using NeedSomeHelp.Components.Layout
+@using NeedSomeHelp.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Add Request</PageTitle>
 
-<RadzenStack Gap="0" Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); position: relative;">
+<RadzenStack Gap="0"
+    Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); position: relative;">
     <!-- Top Header Area with Back Button -->
     <a href="/" style="position: fixed; top: 1rem; left: 1rem; cursor: pointer; z-index: 10">
         <RadzenIcon Icon="arrow_back" Style="font-size: 2rem;" Click="@(() => NavigationManager.NavigateTo("/"))" />
     </a>
-
-    <RadzenTemplateForm Data="@model">
+    <RadzenTemplateForm Data="@model" Submit="@(async (RequestFormModel args) => await OnRequestSubmit(args))">
         <RadzenStack Gap="0.7rem" Style="padding: var(--screen-padding); padding: 0;">
-            <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" style="background-color: var(--material-theme-sys-light-secondary-container); padding: 4rem 2rem;">
-                <button onclick="@OnPhotoAdd" style="background: var(--material-theme-sys-light-secondary); cursor: pointer; border: none; border-radius: 50%; aspect-ratio: 1/1; padding: 1rem;">
-                  <RadzenIcon Icon="add" Style="font-size: 3rem; color: var(--material-theme-sys-light-on-secondary);" />
+            <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+                style="background-color: var(--material-theme-sys-light-secondary-container); padding: 4rem 2rem;">
+                <button onclick="@OnPhotoAdd"
+                    style="background: var(--material-theme-sys-light-secondary); cursor: pointer; border: none; border-radius: 50%; aspect-ratio: 1/1; padding: 1rem;">
+                    <RadzenIcon Icon="add"
+                        Style="font-size: 3rem; color: var(--material-theme-sys-light-on-secondary);" />
                 </button>
                 <input type="file" accept="image/*" style="display: none;" />
-                <RadzenText Text="Photo" TextStyle="TextStyle.H2" Style="color: var(--material-theme-sys-light-on-secondary-container)" />
+                <RadzenText Text="Photo" TextStyle="TextStyle.H4"
+                    Style="color: var(--material-theme-sys-light-on-secondary-container)" />
             </RadzenStack>
             <!-- Inputs Section -->
             <RadzenStack Gap="1rem" Style="padding: 0 var(--screen-padding);">
@@ -32,25 +42,28 @@
                     <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width: 100%;">
                         <RadzenTextArea @bind-Value="@model.Description" Name="Description" Rows="4" MaxLength="400" />
                     </RadzenFormField>
-                    <RadzenText TextStyle="TextStyle.Caption" Style="color: var(--material-theme-sys-light-on-surface-variant);">
+                    <RadzenText TextStyle="TextStyle.Caption"
+                        Style="color: var(--material-theme-sys-light-on-surface-variant);">
                         @(model.Description?.Length ?? 0)/400 max characters
                     </RadzenText>
                 </RadzenStack>
 
                 <!-- Location -->
                 <RadzenStack Gap="0.7rem">
-                  <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
-                      <RadzenFormField Text="Location" Variant="Variant.Outlined" Style="flex: 1;">
-                          <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
-                      </RadzenFormField>
-                      <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="@GetLocation" Style="margin-top: 0.45rem"/>
-                  </RadzenStack>
-                  
-                  <!-- Is help remote? -->
-                  <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                      <RadzenCheckBox @bind-Value="@model.IsRemote" Name="IsRemote" />
-                      <RadzenLabel Text="Is help remote?" Component="IsRemote" Style="color: var(--material-theme-sys-light-on-surface-variant);" />
-                  </RadzenStack>
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                        <RadzenFormField Text="Location" Variant="Variant.Outlined" Style="flex: 1;">
+                            <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
+                        </RadzenFormField>
+                        <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
+                            Click="@GetLocation" Style="margin-top: 0.45rem" />
+                    </RadzenStack>
+
+                    <!-- Is help remote? -->
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox @bind-Value="@model.IsRemote" Name="IsRemote" />
+                        <RadzenLabel Text="Is help remote?" Component="IsRemote"
+                            Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                    </RadzenStack>
                 </RadzenStack>
 
 
@@ -59,20 +72,22 @@
                      The design shows another text field with label "Title" and a checkbox "I want to use my phone".
                      This typically suggests a contact number field. -->
                 <RadzenStack Gap="0.7rem">
-                  <RadzenFormField Text="Title" Variant="Variant.Outlined" Style="width: 100%;">
-                      <RadzenTextBox @bind-Value="@model.SecondTitle" Name="SecondTitle" />
-                  </RadzenFormField>
-                  <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                      <RadzenCheckBox @bind-Value="@model.UsePhone" Name="UsePhone" />
-                      <RadzenLabel Text="I want to use my phone" Component="UsePhone" Style="color: var(--material-theme-sys-light-on-surface-variant);" />
-                  </RadzenStack>
+                    <RadzenFormField Text="Phone" Variant="Variant.Outlined" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="@model.PhoneNumber" Name="PhoneNumber" />
+                    </RadzenFormField>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox @bind-Value="@model.UseMyPhone" Name="UseMyPhone" />
+                        <RadzenLabel Text="I want to use my phone" Component="UseMyPhone"
+                            Style="color: var(--material-theme-sys-light-on-surface-variant);" />
+                    </RadzenStack>
                 </RadzenStack>
 
             </RadzenStack>
 
             <!-- Add Request Button -->
             <!-- Positioning at bottom center as per design (approx) -->
-            <RadzenButton ButtonType="ButtonType.Submit" Text="ADD REQUEST" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Style="align-self: center; margin-top: 1.5rem; margin-bottom: 2rem;" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="ADD REQUEST" ButtonStyle="ButtonStyle.Primary"
+                Variant="Variant.Flat" Style="align-self: center; margin-top: 1.5rem; margin-bottom: 2rem;" />
         </RadzenStack>
     </RadzenTemplateForm>
 </RadzenStack>
@@ -84,17 +99,44 @@
         public string Description { get; set; } = "";
         public string Location { get; set; } = "";
         public bool IsRemote { get; set; }
-        public string SecondTitle { get; set; } = "";
-        public bool UsePhone { get; set; }
+        public string PhoneNumber { get; set; } = "";
+        public bool UseMyPhone { get; set; }
     }
 
     RequestFormModel model = new RequestFormModel();
 
-    void OnRequestSubmit(RequestFormModel args)
+    async Task OnRequestSubmit(RequestFormModel args)
     {
-        // TODO: Handle submission
-        Console.WriteLine($"Submitting: {args.Title}");
-        NavigationManager.NavigateTo("/");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        Console.WriteLine("Submitting request");
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var currentUser = await UserManager.GetUserAsync(user);
+            if (currentUser != null)
+            {
+                var newRequest = new HelpRequest
+                {
+                    Title = args.Title,
+                    Description = args.Description,
+                    Location = args.Location,
+                    PhoneNumber = args.UseMyPhone ? currentUser.PhoneNumber : args.PhoneNumber,
+                    OwnerId = currentUser.Id,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                DbContext.HelpRequests.Add(newRequest);
+                await DbContext.SaveChangesAsync();
+
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("Identity/Account/Login", true);
+        }
     }
 
     void GetLocation()

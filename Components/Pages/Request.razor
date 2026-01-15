@@ -7,9 +7,11 @@
 
 
 <div class="request-container">
-    <a href="/" class="back-button">
+    <RadzenButton Icon="arrow_back" Class="back-button" ButtonStyle="ButtonStyle.Secondary" Style="min-width: auto;"
+        Click="@(() => NavigationManager.NavigateTo("/"))" />
+    @* <a href="/" class="back-button">
         <RadzenIcon Icon="arrow_back" class="back-icon" />
-    </a>
+    </a> *@
     <RadzenImage Path="assets/requests/1.png" class="image" />
     <RadzenStack Gap="1.1rem" class="content-stack">
         <RadzenStack Gap="0.25rem">

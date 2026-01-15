@@ -2,24 +2,24 @@
   padding-bottom: 2rem;
 }
 
-.back-button {
+::deep .back-button {
   position: absolute;
   top: 1rem;
   left: 1rem;
   cursor: pointer;
 }
 
-.image {
+::deep .image {
   background-color: #f1f1f1;
   height: 13.125rem;
   width: 100%;
 }
 
-.title {
+::deep .title {
   font-weight: 600;
 }
 
-.content-stack {
+::deep .content-stack {
   padding: 1.5rem 1.25rem;
 }
 
@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-.avatar {
+::deep .avatar {
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
@@ -38,38 +38,38 @@
   flex: 1;
 }
 
-.report-text {
+::deep .report-text {
   color: var(--material-theme-sys-light-error);
   cursor: pointer;
 }
 
-.report-icon {
+::deep .report-icon {
   color: var(--material-theme-sys-light-error);
   font-size: 1rem;
 }
 
-.star-icon {
+::deep .star-icon {
   font-size: 1rem;
 }
 
-.rating-text {
+::deep .rating-text {
   line-height: 1;
 }
 
-.reviews-text {
+::deep .reviews-text {
   color: var(--material-theme-sys-light-secondary);
   line-height: 1;
 }
 
-.login-text {
+::deep .login-text {
   color: var(--material-theme-sys-light-secondary);
 }
 
-.location-title {
+::deep .location-title {
   font-weight: 600;
 }
 
-.action-buttons-container {
+::deep .action-buttons-container {
   margin-top: 1rem;
   background-color: var(--material-theme-sys-light-background);
   position: fixed;
@@ -79,11 +79,11 @@
   padding: 0.5rem var(--screen-padding);
 }
 
-.share-btn,
-.phone-btn {
+::deep .share-btn,
+::deep .phone-btn {
   width: 25%;
 }
 
-.message-btn {
+::deep .message-btn {
   width: 50%;
 }
