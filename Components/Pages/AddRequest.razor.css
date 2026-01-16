@@ -45,8 +45,8 @@
   display: none;
 }
 
-::deep .upload-spinner {
-  color: var(--material-theme-sys-light-on-secondary);
+::deep .upload-spinner .rz-progressbar-circular-value {
+  stroke: var(--material-theme-sys-light-on-secondary);
 }
 
 ::deep .upload-icon {
