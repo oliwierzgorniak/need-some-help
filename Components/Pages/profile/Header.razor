@@ -1,6 +1,7 @@
 @using NeedSomeHelp.Data
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div>
   <RadzenStack Gap="0.9rem" class="header-section">
@@ -27,6 +28,16 @@
     if (!string.IsNullOrEmpty(UserId))
     {
       User = await UserManager.FindByIdAsync(UserId);
+    }
+    else
+    {
+      var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+      var userPrincipal = authState.User;
+
+      if (userPrincipal.Identity is not null && userPrincipal.Identity.IsAuthenticated)
+      {
+        User = await UserManager.GetUserAsync(userPrincipal);
+      }
     }
   }
 }
