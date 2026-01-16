@@ -1,4 +1,4 @@
-@page "/chat/{UserId}"
+@page "/chat/{RequestId:int}"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
@@ -13,8 +13,8 @@
 <div class="chat-container">
     <!-- Header -->
     <div class="chat-header">
-        <a href="/" class="arrow-back">
-            <RadzenIcon Icon="arrow_back" Click="@(() => NavigationManager.NavigateTo("/"))" />
+        <a href="/chats" class="arrow-back">
+            <RadzenIcon Icon="arrow_back" />
         </a>
         <div class="chat-header-info">
             <p class="chat-header-title">@(ContactName ?? "User")</p>
@@ -44,10 +44,10 @@
 
 @code {
     [Parameter]
-    public String UserId { get; set; }
+    public int RequestId { get; set; }
 
     private string ContactName = "Loading...";
-    private string RequestTitle = "Help request"; // TODO: Should likely be dynamic based on a RequestId context too
+    private string RequestTitle = "Loading...";
     private string messageInput = "";
     private List<ChatMessage> messages = new();
     private ApplicationUser? CurrentUser;
@@ -74,7 +74,6 @@
         }
         else
         {
-            // Redirect to login if needed, or handle unauthenticated state
             NavigationManager.NavigateTo("Identity/Account/Login", true);
         }
     }
@@ -83,17 +82,58 @@
     {
         if (CurrentUser == null) return;
 
-        // 1. Get the other user's info
-        var otherUser = await DbContext.Users.FindAsync(UserId);
-        if (otherUser != null)
+        // 1. Get the Help Request info for context
+        var request = await DbContext.HelpRequests
+            .Include(r => r.Owner)
+            .Include(r => r.ContactedByUsers)
+            .FirstOrDefaultAsync(r => r.Id == RequestId);
+
+        if (request != null)
         {
-            ContactName = otherUser.Name ?? "Unknown";
+            RequestTitle = request.Title;
+        }
+        else 
+        {
+            return;
         }
 
-        // 2. Fetch messages between CurrentUser and the other User (UserId)
+        // 2. Identify "Other User" for header display
+        string otherUserId = string.Empty;
+
+        if (CurrentUser.Id == request.OwnerId)
+        {
+            // First check if there are any existing messages from someone else in this channel
+            var activePartnerId = await DbContext.Messages
+                .Where(m => m.RequestId == RequestId && m.SenderId != CurrentUser.Id)
+                .Select(m => m.SenderId)
+                .FirstOrDefaultAsync();
+
+            if (!string.IsNullOrEmpty(activePartnerId))
+            {
+                 otherUserId = activePartnerId;
+            }
+            else if (request.ContactedByUsers.Any())
+            {
+                 otherUserId = request.ContactedByUsers.First().Id;
+            }
+        }
+        else
+        {
+             otherUserId = request.OwnerId;
+        }
+
+        if (!string.IsNullOrEmpty(otherUserId))
+        {
+             var otherUser = await DbContext.Users.FindAsync(otherUserId);
+             if (otherUser != null)
+             {
+                 ContactName = otherUser.Name ?? otherUser.UserName ?? "User";
+             }
+        }
+
+        // 3. Fetch messages for this REQUEST
         var dbMessages = await DbContext.Messages
-        .Where(m => (m.SenderId == CurrentUser.Id && m.ReceiverId == UserId) ||
-        (m.SenderId == UserId && m.ReceiverId == CurrentUser.Id))
+        .Where(m => m.RequestId == RequestId)
         .OrderBy(m => m.Timestamp)
         .ToListAsync();
 
@@ -109,10 +149,63 @@
     {
         if (!string.IsNullOrWhiteSpace(messageInput) && CurrentUser != null)
         {
+            // Determine receiver based on context
+            // If I am the Owner (CurrentUser.Id == request.OwnerId), then the receiver must be inferred from the context.
+            // BUT, without a UserId in the URL, if I have multiple people contacting me, this single page is ambiguous.
+            // However, following the instruction "based on the requestId look up in db other users name (not logged in - the other)",
+            // implies we just find "the other one".
+            
+            // Re-fetch request to be sure (it's cached in EF usually but safety first)
+            var request = await DbContext.HelpRequests.FindAsync(RequestId);
+            if (request == null) return;
+
+            string receiverId = string.Empty;
+
+            if (CurrentUser.Id == request.OwnerId)
+            {
+               // I am the owner. Who am I talking to?
+               // The instruction implies there IS an "other user".
+               // Query the messages for this RequestId to find someone who isn't me.
+               var lastMessage = await DbContext.Messages
+                   .Where(m => m.RequestId == RequestId && m.SenderId != CurrentUser.Id)
+                   .OrderByDescending(m => m.Timestamp)
+                   .FirstOrDefaultAsync();
+                   
+               if (lastMessage != null)
+               {
+                   receiverId = lastMessage.SenderId;
+               }
+               else 
+               {
+                   // No messages yet? Then we can check the ContactedByUsers list.
+                   // We need to fetch it explicitly
+                   var reqWithContacts = await DbContext.HelpRequests
+                      .Include(r => r.ContactedByUsers)
+                      .FirstOrDefaultAsync(r => r.Id == RequestId);
+                      
+                   if (reqWithContacts != null && reqWithContacts.ContactedByUsers.Any())
+                   {
+                        // Logic: Pick the first or most recent contact? 
+                        // If the user insists on /chat/{RequestId}, and I am the owner, and 5 people contacted me...
+                        // This logic forces a collision unless we assume 1 helper.
+                        // We'll pick the first one for now as a fallback.
+                        receiverId = reqWithContacts.ContactedByUsers.First().Id;
+                   }
+               }
+            }
+            else
+            {
+                // I am the helper. Receiver is the owner.
+                receiverId = request.OwnerId;
+            }
+
+            if (string.IsNullOrEmpty(receiverId)) return; // Can't send if we don't know who to.
+
             var newMessage = new Message
             {
                 SenderId = CurrentUser.Id,
-                ReceiverId = UserId,
+                ReceiverId = receiverId,
+                RequestId = RequestId,
                 Content = messageInput,
                 Timestamp = DateTime.UtcNow
             };

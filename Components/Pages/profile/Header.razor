@@ -1,6 +1,10 @@
+@using NeedSomeHelp.Data
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
 <div>
   <RadzenStack Gap="0.9rem" class="header-section">
-    <RadzenText Text="Josephine" TextStyle="TextStyle.H3" TagName="TagName.H1" class="user-name" />
+    <RadzenText Text="@(User?.Name ?? "Loading...")" TextStyle="TextStyle.H3" TagName="TagName.H1" class="user-name" />
     <RadzenStack Gap="0.3rem">
       <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.15rem">
         <RadzenText Text="4.9" TextStyle="TextStyle.H5" class="rating-value" />
@@ -14,5 +18,15 @@
 
 @code {
   [Parameter]
-  public string UserId { get; set; }
+  public string UserId { get; set; } = string.Empty;
+
+  private ApplicationUser? User;
+
+  protected override async Task OnInitializedAsync()
+  {
+    if (!string.IsNullOrEmpty(UserId))
+    {
+      User = await UserManager.FindByIdAsync(UserId);
+    }
+  }
 }

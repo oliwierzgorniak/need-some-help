@@ -120,7 +120,7 @@
             // Don't let users message themselves
             if (userId == request.OwnerId)
             {
-                NavigationManager.NavigateTo("/chats");
+                NavigationManager.NavigateTo($"/chat/{request.Id}"); // Or just go to chats main list?
                 return;
             }
 
@@ -137,7 +137,7 @@
                     await DbContext.SaveChangesAsync();
                 }
 
-                NavigationManager.NavigateTo("/chats");
+                NavigationManager.NavigateTo($"/chat/{request.Id}");
             }
         }
     }

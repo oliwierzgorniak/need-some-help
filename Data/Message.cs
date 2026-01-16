@@ -19,6 +19,11 @@ public class Message
     [ForeignKey(nameof(ReceiverId))]
     public ApplicationUser Receiver { get; set; } = null!;
 
+    public int RequestId { get; set; }
+    
+    [ForeignKey(nameof(RequestId))]
+    public HelpRequest Request { get; set; } = null!;
+
     [Required]
     public string Content { get; set; } = string.Empty;
 
