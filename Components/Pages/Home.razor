@@ -8,23 +8,12 @@
 
 <PageTitle>Home</PageTitle>
 
-<style>
-    /* In case the component renders a body tag improperly or uses it as a root */
-    .map-container body {
-        height: 100%;
-    }
 
-    /* Hide the available maps (layers) control */
-    .map-container .leaflet-control-layers {
-        display: none;
-    }
-</style>
 
 @if (isChecking)
 {
     @* Loading state matches app background *@
-    <div
-        style="display:flex; justify-content:center; align-items:center; height:100vh; background-color: var(--material-theme-sys-light-background);">
+    <div class="loading-container">
         <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate"
             Size="ProgressBarCircularSize.Medium" />
     </div>
@@ -32,8 +21,7 @@
 else
 {
     <!-- Main Container matching Figma #F9F9FF background -->
-    <RadzenStack Gap="1.5rem"
-        Style="@($"background-color: var(--material-theme-sys-light-background); position: relative; padding: var(--screen-padding); padding-bottom: 5rem; {(isMapMode ? "height: 100vh; overflow: hidden;" : "min-height: 100vh;")}")">
+    <div class="@($"home-container {(isMapMode ? "map-mode" : "")}")">
         <RadzenStack Gap="0.7em">
             <!-- Search Bar (Node 138:4686) -->
             <!-- Actions Row (Filter & Map) -->
@@ -43,17 +31,15 @@ else
                 <RadzenButton class="icon-filled" Text="Filter" Icon="filter_alt" ButtonStyle="ButtonStyle.Secondary"
                     Variant="Variant.Flat" />
                 <!-- Map Button (Node 138:4700) -->
-                <RadzenButton class="icon-filled" Click="@(() => isMapMode = !isMapMode)"
+                <RadzenButton class="icon-filled action-button" Click="@(() => isMapMode = !isMapMode)"
                     Text="@(!isMapMode ? "Map" : "List")" Icon="@(!isMapMode ? "map" : "list")"
-                    ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat"
-                    Style="letter-spacing: 0.031rem; font-weight: 500;" />
+                    ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" />
             </RadzenStack>
             @if (!isMapMode)
             {
-                <div style="position: relative; width: 100%;">
-                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Style="margin: 0; width: 100%;" />
-                    <RadzenIcon Icon="search"
-                        Style="position: absolute; right: 1px; top: 50%; transform: translateY(-50%); background: var(--material-theme-sys-light-background); padding: 0 1rem;" />
+                <div class="search-container">
+                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Class="search-input" />
+                    <RadzenIcon Icon="search" Class="search-icon" />
                 </div>
             }
 
@@ -62,16 +48,15 @@ else
         <!-- Feed List (Node 136:4548) -->
         @if (isMapMode)
         {
-            <div class="map-container" style="flex: 1;">
+            <div class="home-map-container">
                 <RealTimeMap Height="100%" Width="100%" @ref="realTimeMap" Parameters="@mapParameters"
                     OnAfterMapLoaded="@OnMapLoaded" OnClickMap="@OnMapClick">
-                    <!-- Add markers, layers, etc. via C# -->
                 </RealTimeMap>
             </div>
         }
         else
         {
-            <RadzenStack Gap="1rem">
+            <RadzenStack Gap="1rem" class="cards-container">
                 @foreach (var request in requests)
                 {
                     <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
@@ -79,11 +64,8 @@ else
                 }
             </RadzenStack>
         }
-
-        <!-- Bottom Navigation (Node 137:4598) -->
         <Nav />
-
-    </RadzenStack>
+    </div>
 }
 
 @code {

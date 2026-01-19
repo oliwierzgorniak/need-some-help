@@ -7,6 +7,7 @@
 @using Azure.Storage.Blobs.Models
 @using Azure.Storage.Sas
 @using Azure
+@using Azure.AI.ContentSafety
 @using System.IO
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext DbContext
@@ -23,6 +24,13 @@
     </a>
     <RadzenTemplateForm Data="@model" Submit="@(async (RequestFormModel args) => await OnRequestSubmit(args))">
         <RadzenStack Gap="0.7rem" class="form-wrapper">
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div
+                    style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px; border: 1px solid red; margin-bottom: 10px;">
+                    @errorMessage
+                </div>
+            }
             <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
                 class="photo-upload-area" Style="@($"background-image: url('{model.PhotoUrl}');")">
                 <label class="upload-label">
@@ -102,6 +110,7 @@
 
     RequestFormModel model = new RequestFormModel();
     bool isUploading = false;
+    string errorMessage = "";
 
     async Task UploadPhoto(InputFileChangeEventArgs e)
     {
@@ -174,6 +183,14 @@
 
     async Task OnRequestSubmit(RequestFormModel args)
     {
+        errorMessage = "";
+
+        if (!await IsContentSafe(args.Title, args.Description, args.PhotoUrl))
+        {
+            errorMessage = "Your content was flagged as unsafe. Please remove any inappropriate text or images.";
+            return;
+        }
+
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -211,5 +228,46 @@
     {
         // TODO: Implement geolocation fetch
         model.Location = "Current Location"; // Placeholder
+    }
+
+    async Task<bool> IsContentSafe(string title, string description, string? photoUrl)
+    {
+        var endpoint = Configuration["Azure:ContentSafety:Endpoint"];
+        var key = Configuration["Azure:ContentSafety:Key"];
+
+        if (string.IsNullOrEmpty(endpoint) || string.IsNullOrEmpty(key)) return true;
+
+        try
+        {
+            var client = new ContentSafetyClient(new Uri(endpoint), new AzureKeyCredential(key));
+
+            // Text Analysis
+            var text = (title + " " + description).Trim();
+            if (!string.IsNullOrEmpty(text))
+            {
+                var textOptions = new AnalyzeTextOptions(text);
+                var response = await client.AnalyzeTextAsync(textOptions);
+                if (response.Value.CategoriesAnalysis.Any(c => c.Severity >= 2)) return false;
+            }
+
+            // Image Analysis
+            if (!string.IsNullOrEmpty(photoUrl))
+            {
+                using var http = new HttpClient();
+                // Download the image data
+                var imageBytes = await http.GetByteArrayAsync(photoUrl);
+                var imageData = new ContentSafetyImageData(new BinaryData(imageBytes));
+                var imageOptions = new AnalyzeImageOptions(imageData);
+
+                var imageResponse = await client.AnalyzeImageAsync(imageOptions);
+                if (imageResponse.Value.CategoriesAnalysis.Any(c => c.Severity >= 2)) return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Content Validation Error: {ex.Message}");
+        }
+
+        return true;
     }
 }
