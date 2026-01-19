@@ -9,12 +9,9 @@
   <a href=".." class="back-button">
     <RadzenIcon Icon="arrow_back" />
   </a>
-  <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem" class="header-section">
-    <RadzenImage Path="@($"assets/users/{UserId}.png")" class="avatar-image" />
-    <RadzenStack Gap="0">
-      <RadzenText Text="Josephine" TextStyle="TextStyle.H4" class="user-name" />
-      <RadzenText Text="Help with gardening" TextStyle="TextStyle.Body1" class="sub-text" />
-    </RadzenStack>
+  <RadzenStack Gap="0" class="header-section">
+    <RadzenText Text="Josephine" TextStyle="TextStyle.H3" class="user-name" />
+    <RadzenText Text="Help with gardening" TextStyle="TextStyle.Body1" class="sub-text" />
   </RadzenStack>
   <RadzenRating Stars="5" @bind-Value="Rating" class="rating-control" />
   <RadzenTextArea @bind-Value="ReviewText" class="review-input" Placeholder="Write your review here..." />

@@ -1,14 +1,22 @@
 .review-container {
   padding: var(--screen-padding);
   padding-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 .back-button ::deep i {
   font-size: 2.3rem;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
 }
 
 ::deep .header-section {
-  margin-top: 1.7rem;
+  text-align: center;
 }
 
 ::deep .avatar-image {
@@ -23,7 +31,9 @@
 }
 
 ::deep .rating-control {
-  margin-top: 1.5rem;
+  margin-left: -0.4rem;
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
 }
 
 ::deep .review-input {
@@ -31,6 +41,7 @@
   resize: none;
   aspect-ratio: 4/2;
   margin: 0.5rem 0;
+  margin-bottom: 5rem;
 }
 
 ::deep .review-button {
