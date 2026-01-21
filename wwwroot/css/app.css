@@ -89,6 +89,17 @@ a {
   font-variation-settings: "FILL" 1;
 }
 
+.arrow-back {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  cursor: pointer;
+}
+
+.arrow-back i {
+  font-size: var(--arrow-back-font-size);
+}
+
 html,
 body {
   font-family: "Roboto", sans-serif;

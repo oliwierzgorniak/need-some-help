@@ -1,0 +1,81 @@
+@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using NeedSomeHelp.Data
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sign Up</PageTitle>
+
+<div class="register-container">
+  <a href="javascript:history.back()" class="arrow-back">
+    <RadzenIcon Icon="arrow_back" />
+  </a>
+  <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="2rem" Class="content-wrapper">
+    <!-- Title -->
+    <RadzenText Text="Before you continue, create an account" TextStyle="TextStyle.H6" Class="title-text" />
+    <!-- Form -->
+    <RadzenTemplateForm TItem="RegisterModel" Data="@model" Submit="@OnSubmit">
+      <RadzenStack Gap="1rem" Class="form-stack">
+        <RadzenStack Gap="0.2rem">
+          <RadzenTextBox Placeholder="Name" @bind-Value="model.Name" Class="input-control" Name="Name" />
+          <RadzenRequiredValidator Component="Name" Text="Name is required" Class="validator" />
+        </RadzenStack>
+
+        <!-- Email -->
+        <RadzenStack Gap="0.2rem">
+          <RadzenTextBox Placeholder="Email" @bind-Value="model.Email" Class="input-control" Name="Email" />
+          <RadzenRequiredValidator Component="Email" Text="Email is required" Class="validator" />
+          <RadzenEmailValidator Component="Email" Text="Invalid email" Class="validator" />
+        </RadzenStack>
+
+        <!-- Password -->
+        <RadzenStack Gap="0.2rem">
+          <RadzenPassword Placeholder="Password" @bind-Value="model.Password" Class="input-control" Name="Password" />
+          <RadzenRequiredValidator Component="Password" Text="Password is required" Popup="true" Class="validator" />
+        </RadzenStack>
+
+        <!-- Sign Up Button -->
+        <RadzenButton ButtonType="ButtonType.Submit" Text="Sign up" />
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+          <RadzenText TextStyle="TextStyle.Body2" Class="error-message">@errorMessage</RadzenText>
+        }
+      </RadzenStack>
+    </RadzenTemplateForm>
+  </RadzenStack>
+</div>
+
+@code {
+  class RegisterModel
+  {
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Password { get; set; } = "";
+  }
+
+  private RegisterModel model = new();
+  private string errorMessage = "";
+
+  private async Task OnSubmit(RegisterModel args)
+  {
+    errorMessage = "";
+    var user = new ApplicationUser { UserName = args.Email, Email = args.Email, Name = args.Name };
+    var result = await UserManager.CreateAsync(user, args.Password);
+
+    Console.WriteLine("Registration attempt result: " + result.Succeeded);
+
+    if (result.Succeeded)
+    {
+      // Redirect to login page or automatically sign in (requires more setup in Blazor Server)
+      // For now, redirecting to the default Identity login page
+      await JSRuntime.InvokeVoidAsync("history.back");
+    }
+    else
+    {
+      errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+    }
+  }
+}

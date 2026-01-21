@@ -1,0 +1,13 @@
+.register-container {
+  height: 100vh;
+  background-color: var(--rz-white);
+  padding: var(--screen-padding);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+::deep .validator {
+  font-size: 0.75rem;
+  color: var(--material-theme-sys-light-error);
+}
