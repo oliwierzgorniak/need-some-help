@@ -22,7 +22,7 @@ else
 {
     <!-- Main Container matching Figma #F9F9FF background -->
     <div class="@($"home-container {(isMapMode ? "map-mode" : "")}")">
-        <RadzenStack Gap="0.7em">
+        @* <RadzenStack Gap="0.7em">
             <!-- Search Bar (Node 138:4686) -->
             <!-- Actions Row (Filter & Map) -->
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
@@ -43,7 +43,7 @@ else
                 </div>
             }
 
-        </RadzenStack>
+        </RadzenStack> *@
 
         <!-- Feed List (Node 136:4548) -->
         @if (isMapMode)

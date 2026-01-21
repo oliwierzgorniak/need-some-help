@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeedSomeHelp.Data;
 
@@ -11,9 +12,11 @@ using NeedSomeHelp.Data;
 namespace NeedSomeHelp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260120091659_AddWalletToUser")]
+    partial class AddWalletToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -322,50 +325,6 @@ namespace NeedSomeHelp.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("NeedSomeHelp.Data.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BlockchainReference")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("HelpRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RevieweeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ReviewerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HelpRequestId");
-
-                    b.HasIndex("RevieweeId");
-
-                    b.HasIndex("ReviewerId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("ContactedHelpRequests", b =>
                 {
                     b.HasOne("NeedSomeHelp.Data.ApplicationUser", null)
@@ -467,38 +426,6 @@ namespace NeedSomeHelp.Migrations
                     b.Navigation("Request");
 
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("NeedSomeHelp.Data.Review", b =>
-                {
-                    b.HasOne("NeedSomeHelp.Data.HelpRequest", "HelpRequest")
-                        .WithMany()
-                        .HasForeignKey("HelpRequestId");
-
-                    b.HasOne("NeedSomeHelp.Data.ApplicationUser", "Reviewee")
-                        .WithMany("ReceivedReviews")
-                        .HasForeignKey("RevieweeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("NeedSomeHelp.Data.ApplicationUser", "Reviewer")
-                        .WithMany("WrittenReviews")
-                        .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("HelpRequest");
-
-                    b.Navigation("Reviewee");
-
-                    b.Navigation("Reviewer");
-                });
-
-            modelBuilder.Entity("NeedSomeHelp.Data.ApplicationUser", b =>
-                {
-                    b.Navigation("ReceivedReviews");
-
-                    b.Navigation("WrittenReviews");
                 });
 #pragma warning restore 612, 618
         }

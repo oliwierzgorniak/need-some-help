@@ -1,0 +1,91 @@
+@page "/profile/{UserId}/review"
+@using NeedSomeHelp.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@using Radzen
+@using Radzen.Blazor
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Give Review</PageTitle>
+
+<div class="review-container">
+  <a href="@($"/profile/{UserId}")" class="back-button">
+    <RadzenIcon Icon="arrow_back" />
+  </a>
+  <RadzenStack Gap="0" class="header-section">
+    <RadzenText Text="@userName" TextStyle="TextStyle.H3" class="user-name" />
+    <RadzenDropDown @bind-Value=@selectedHelpRequestId Data=@helpRequests TextProperty="Title" ValueProperty="Id"
+      Name="DropDownBindValue" Placeholder="Select a request..." class="dropdown" />
+  </RadzenStack>
+  <RadzenRating Stars="5" @bind-Value="Rating" class="rating-control" />
+  <RadzenTextArea @bind-Value="ReviewText" class="review-input" Placeholder="Write your review here..." />
+  <RadzenButton Text="Give review" class="review-button" Click="OnGiveReviewClick" />
+</div>
+
+@code {
+  [Parameter]
+  public string UserId { get; set; } = String.Empty;
+
+  public int Rating { get; set; }
+  public string ReviewText { get; set; } = "";
+  private string userName = "User";
+  private List<HelpRequest> helpRequests = new();
+  private int selectedHelpRequestId;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (!string.IsNullOrEmpty(UserId))
+    {
+      var otherUser = await DbContext.Users.FindAsync(UserId);
+      if (otherUser != null)
+        userName = otherUser.Name ?? otherUser.UserName ?? "User";
+    }
+
+    if (user.Identity is { IsAuthenticated: true })
+    {
+      var loggedInUserId = UserManager.GetUserId(user);
+      if (!string.IsNullOrEmpty(loggedInUserId))
+      {
+        helpRequests = await DbContext.HelpRequests
+        .Where(hr => hr.OwnerId == loggedInUserId && hr.ContactedByUsers.Any(c => c.Id == UserId))
+        .ToListAsync();
+      }
+    }
+  }
+
+  private async Task OnGiveReviewClick()
+  {
+    @* !TODO handle error message *@
+    if (selectedHelpRequestId == 0) return;
+
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+    if (user.Identity is { IsAuthenticated: false }) return;
+
+    var reviewerId = UserManager.GetUserId(user);
+    if (!string.IsNullOrEmpty(reviewerId))
+    {
+      var review = new NeedSomeHelp.Data.Review
+      {
+        Rating = Rating,
+        Content = ReviewText,
+        ReviewerId = reviewerId,
+        RevieweeId = UserId,
+        HelpRequestId = selectedHelpRequestId == 0 ? null : selectedHelpRequestId,
+        CreatedAt = DateTime.UtcNow
+      };
+
+      DbContext.Reviews.Add(review);
+      await DbContext.SaveChangesAsync();
+    }
+
+    NavigationManager.NavigateTo($"/profile/{UserId}");
+  }
+}

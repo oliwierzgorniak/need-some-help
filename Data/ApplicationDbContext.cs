@@ -7,6 +7,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Message> Messages { get; set; }
     public DbSet<HelpRequest> HelpRequests { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -16,6 +17,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(m => m.Sender)
             .WithMany()
             .HasForeignKey(m => m.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Review>()
+            .HasOne(r => r.Reviewer)
+            .WithMany(u => u.WrittenReviews)
+            .HasForeignKey(r => r.ReviewerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Review>()
+            .HasOne(r => r.Reviewee)
+            .WithMany(u => u.ReceivedReviews)
+            .HasForeignKey(r => r.RevieweeId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Message>()

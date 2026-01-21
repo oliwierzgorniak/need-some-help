@@ -1,0 +1,43 @@
+.tip-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.arrow-back {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  text-decoration: none;
+}
+
+::deep .container {
+  margin-bottom: 1.9rem;
+}
+
+::deep .tip-amount-input {
+  background: none;
+  border: none;
+  border-bottom: 0.1rem solid var(--material-theme-sys-light-on-background);
+  text-align: center;
+  width: 8ch;
+  padding-bottom: 0.5rem;
+  font-size: 2.4rem;
+}
+
+::deep .tip-amount-input:focus {
+  outline: none;
+}
+
+::deep .tip-subtitle {
+  text-align: center;
+}
+
+::deep .send-button {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
