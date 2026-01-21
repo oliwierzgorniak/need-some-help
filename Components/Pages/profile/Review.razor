@@ -54,7 +54,9 @@
       if (!string.IsNullOrEmpty(loggedInUserId))
       {
         helpRequests = await DbContext.HelpRequests
-        .Where(hr => hr.OwnerId == loggedInUserId && hr.ContactedByUsers.Any(c => c.Id == UserId))
+        .Where(hr => hr.OwnerId == loggedInUserId
+        && hr.ContactedByUsers.Any(c => c.Id == UserId)
+        && !DbContext.Reviews.Any(r => r.HelpRequestId == hr.Id && r.ReviewerId == loggedInUserId && r.RevieweeId == UserId))
         .ToListAsync();
       }
     }

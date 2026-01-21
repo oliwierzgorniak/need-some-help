@@ -3,13 +3,37 @@
 @using Radzen
 @using Radzen.Blazor
 @using NeedSomeHelp.Components.Pages.profile
+@using NeedSomeHelp.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@using Microsoft.EntityFrameworkCore
 
 <PageTitle>My Profile</PageTitle>
 
 <div class="profile-container">
   <RadzenStack Gap="0" class="menu-list">
-    <Header />
+    <Header UserId="@loggedInUserId" />
     <Link Url="@($"/profile/wallet")" IconText="wallet" Text="Your wallet" />
   </RadzenStack>
 </div>
 <Nav Section="profile"></Nav>
+
+@code {
+  private string loggedInUserId = string.Empty;
+
+  protected async override Task OnInitializedAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity is { IsAuthenticated: true })
+    {
+      loggedInUserId = UserManager.GetUserId(user) ?? string.Empty;
+      Console.WriteLine($"Logged in user ID: {loggedInUserId}");
+    }
+  }
+}

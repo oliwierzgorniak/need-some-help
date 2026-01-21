@@ -20,8 +20,10 @@
             <p class="chat-header-title">@(ContactName ?? "User")</p>
             <p class="chat-header-subtitle">@(RequestTitle ?? "Help request")</p>
         </div>
+        <a href="@($"/profile/{ProfileUser?.Id}")">
         <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
             class="icon-filled profile-button" />
+        </a>
     </div>
 
     <!-- Messages -->
@@ -50,7 +52,7 @@
     private string RequestTitle = "Loading...";
     private string messageInput = "";
     private List<ChatMessage> messages = new();
-    private ApplicationUser? CurrentUser;
+    private ApplicationUser? ProfileUser;
 
     private class ChatMessage
     {
@@ -66,8 +68,8 @@
 
         if (user.Identity?.IsAuthenticated == true)
         {
-            CurrentUser = await UserManager.GetUserAsync(user);
-            if (CurrentUser != null)
+            ProfileUser = await UserManager.GetUserAsync(user);
+            if (ProfileUser != null)
             {
                 await LoadChatData();
             }
@@ -80,7 +82,7 @@
 
     private async Task LoadChatData()
     {
-        if (CurrentUser == null) return;
+        if (ProfileUser == null) return;
 
         // 1. Get the Help Request info for context
         var request = await DbContext.HelpRequests
@@ -100,11 +102,11 @@
         // 2. Identify "Other User" for header display
         string otherUserId = string.Empty;
 
-        if (CurrentUser.Id == request.OwnerId)
+        if (ProfileUser.Id == request.OwnerId)
         {
             // First check if there are any existing messages from someone else in this channel
             var activePartnerId = await DbContext.Messages
-                .Where(m => m.RequestId == RequestId && m.SenderId != CurrentUser.Id)
+                .Where(m => m.RequestId == RequestId && m.SenderId != ProfileUser.Id)
                 .Select(m => m.SenderId)
                 .FirstOrDefaultAsync();
 
@@ -140,14 +142,14 @@
         messages = dbMessages.Select(m => new ChatMessage
         {
             Text = m.Content,
-            IsReceived = m.SenderId != CurrentUser.Id,
+            IsReceived = m.SenderId != ProfileUser.Id,
             Timestamp = m.Timestamp
         }).ToList();
     }
 
     private async Task SendMessage()
     {
-        if (!string.IsNullOrWhiteSpace(messageInput) && CurrentUser != null)
+        if (!string.IsNullOrWhiteSpace(messageInput) && ProfileUser != null)
         {
             // Determine receiver based on context
             // If I am the Owner (CurrentUser.Id == request.OwnerId), then the receiver must be inferred from the context.
@@ -161,13 +163,13 @@
 
             string receiverId = string.Empty;
 
-            if (CurrentUser.Id == request.OwnerId)
+            if (ProfileUser.Id == request.OwnerId)
             {
                // I am the owner. Who am I talking to?
                // The instruction implies there IS an "other user".
                // Query the messages for this RequestId to find someone who isn't me.
                var lastMessage = await DbContext.Messages
-                   .Where(m => m.RequestId == RequestId && m.SenderId != CurrentUser.Id)
+                   .Where(m => m.RequestId == RequestId && m.SenderId != ProfileUser.Id)
                    .OrderByDescending(m => m.Timestamp)
                    .FirstOrDefaultAsync();
                    
@@ -203,7 +205,7 @@
 
             var newMessage = new Message
             {
-                SenderId = CurrentUser.Id,
+                SenderId = ProfileUser.Id,
                 ReceiverId = receiverId,
                 RequestId = RequestId,
                 Content = messageInput,
