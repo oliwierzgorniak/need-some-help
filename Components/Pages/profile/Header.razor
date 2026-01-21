@@ -1,17 +1,19 @@
 @using NeedSomeHelp.Data
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationDbContext DbContext
 
 <div>
   <RadzenStack Gap="0.9rem" class="header-section">
     <RadzenText Text="@(User?.Name ?? "Loading...")" TextStyle="TextStyle.H3" TagName="TagName.H1" class="user-name" />
     <RadzenStack Gap="0.3rem">
       <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.15rem">
-        <RadzenText Text="4.9" TextStyle="TextStyle.H5" class="rating-value" />
+        <RadzenText Text="@($"{ReviewRating:F1}")" TextStyle="TextStyle.H5" class="rating-value" />
         <RadzenIcon Icon="star" class="star-icon icon-filled" />
       </RadzenStack>
-      <RadzenText Text="55 reviews" TextStyle="TextStyle.Body2" class="review-count" />
+      <RadzenText Text="@($"{ReviewCount} reviews")" TextStyle="TextStyle.Body2" class="review-count" />
     </RadzenStack>
   </RadzenStack>
 </div>
@@ -22,6 +24,8 @@
   public string UserId { get; set; } = string.Empty;
 
   private ApplicationUser? User;
+  private double ReviewRating = 0.0;
+  private int ReviewCount = 0;
 
   protected override async Task OnInitializedAsync()
   {
@@ -38,6 +42,21 @@
       {
         User = await UserManager.GetUserAsync(userPrincipal);
       }
+    }
+
+    await HandleReviews();
+  }
+
+  private async Task HandleReviews()
+  {
+    var reviews = await DbContext.Reviews
+    .Where(r => r.RevieweeId == UserId)
+    .ToListAsync();
+
+    ReviewCount = reviews.Count;
+    if (ReviewCount > 0)
+    {
+      ReviewRating = reviews.Average(r => r.Rating);
     }
   }
 }
