@@ -1,0 +1,27 @@
+@page
+@model NeedSomeHelp.Pages.LoginModel
+@{
+  ViewData["Title"] = "Login";
+}
+
+<main>
+  <article class="auth">
+    <h1 class="auth__title">Login</h1>
+    <form method="post" class="auth__form">
+      <label class="auth__label">
+        Email
+        <input asp-for="Input.Email" required />
+      </label>
+      <label class="auth__label">
+        Password
+        <input asp-for="Input.Password" type="password" required />
+      </label>
+      <button type="submit" class="auth__submit">Login</button>
+      @if (!ModelState.IsValid)
+      {
+        <div asp-validation-summary="All" class="auth__errors"></div>
+      }
+    </form>
+    <a href="/Register" class="auth__other-link">Register</a>
+  </article>
+</main>

@@ -19,6 +19,12 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Login";
+    options.LogoutPath = "/Logout";
+});
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

@@ -1,0 +1,32 @@
+@page
+@model NeedSomeHelp.Pages.RegisterModel
+@{
+  ViewData["Title"] = "Register";
+}
+
+
+<main>
+  <article class="auth">
+    <h1 class="auth__title">Register</h1>
+    <form method="post" class="auth__form">
+      <label class="auth__label">
+        Name
+        <input asp-for="Input.Name" required />
+      </label>
+      <label class="auth__label">
+        Email
+        <input asp-for="Input.Email" required type="email" />
+      </label>
+      <label class="auth__label">
+        Password
+        <input asp-for="Input.Password" type="password" required type="password" />
+      </label>
+      <button type="submit" class="auth__submit">Register</button>
+      @if (!ModelState.IsValid)
+      {
+        <div asp-validation-summary="All" class="auth__errors"></div>
+      }
+    </form>
+    <a href="/login" class="auth__other-link">Login</a>
+  </article>
+</main>
