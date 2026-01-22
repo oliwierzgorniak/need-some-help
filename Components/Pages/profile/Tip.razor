@@ -17,14 +17,13 @@
     <!-- Wallet Connection Status -->
     @if (string.IsNullOrEmpty(userWalletAddress))
     {
-      <RadzenButton Text="Connect Browser Wallet" Click="ConnectWallet" ButtonStyle="ButtonStyle.Secondary"
-        Variant="Variant.Outlined" Width="100%" />
+      <RadzenButton Text="Connect crypto wallet" Click="ConnectWallet" Variant="Variant.Outlined" />
     }
     else
     {
-      <div class="wallet-info" style="text-align: center; color: var(--rz-text-secondary-color); font-size: 0.875rem;">
+      <div class="wallet-info" style="text-align: center; ">
         <div>Connected: @ShortenAddress(userWalletAddress)</div>
-        <div style="font-weight: bold; color: var(--rz-primary);">Balance: @userBalance.ToString("F4") SOL</div>
+        <div class="wallet-info__amount">Balance: @userBalance.ToString("F4") SOL</div>
       </div>
     }
 
@@ -32,10 +31,11 @@
       <RadzenText TextStyle="TextStyle.H3" Class="user-name">@userName</RadzenText>
       <RadzenImage Path="assets/profile/arrow-up.svg" Height="45px" Width="15px" />
       <RadzenStack Gap="0.3rem">
-        <InputNumber @bind-Value="TipAmount" class="tip-amount-input" />
+        <InputNumber @bind-Value="TipAmount" class="tip-amount-input" Min="0" Step="0.001" />
         <RadzenText Text="solana" TextStyle="TextStyle.Body1" class="tip-subtitle" />
       </RadzenStack>
     </RadzenStack>
+
     <!-- Send Button -->
     <RadzenButton Text="Send tip" class="send-button" Click="SendTip"
       Disabled="@(string.IsNullOrEmpty(userWalletAddress))" />
@@ -52,7 +52,7 @@
   [Parameter]
   public string UserId { get; set; } = string.Empty;
 
-  private decimal TipAmount { get; set; } = 0.5m;
+  private decimal TipAmount { get; set; } = 0.010m;
   private string Message { get; set; } = string.Empty;
   private bool isSending = false;
 
@@ -127,12 +127,39 @@
 
     isSending = true;
 
-    // Note: To actually SIGN the transaction, we need to send the constructed transaction
-    // back to the JavaScript adapter because the Private Key lives in the browser, not here in C#.
-    // For now, we are just displaying the connection connection.
+    try
+    {
+      // 1. Get Recipient Wallet from DB
+      var otherUser = await DbContext.Users.FindAsync(UserId);
+      if (otherUser == null || string.IsNullOrEmpty(otherUser.Wallet))
+      {
+        statusMessage = "User that you're sending to has not connected a wallet yet.";
+        isSending = false;
+        return;
+      }
 
+      // 2. Call JS to build, sign, and send the transaction purely on the client
+      var signature = await JSRuntime.InvokeAsync<string>(
+      "solanaInterop.sendTip",
+      otherUser.Wallet,
+      TipAmount
+      );
 
-    isSending = false;
-    @* NavigationManager.NavigateTo($"/profile/{UserId}"); *@
+      if (!string.IsNullOrEmpty(signature))
+      {
+        Message = "Tip Sent!";
+        statusMessage = "";
+        // Optional: Log transaction to your DB here if needed
+      }
+    }
+    catch (Exception ex)
+    {
+      statusMessage = $"Transaction failed: {ex.Message}";
+      Console.WriteLine(ex);
+    }
+    finally
+    {
+      isSending = false;
+    }
   }
 }

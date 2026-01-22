@@ -23,6 +23,11 @@
   flex-direction: column;
 }
 
+.auth__input {
+  width: 30ch;
+  max-width: 100%;
+}
+
 .auth__submit {
   margin-top: 0.7rem;
   margin-bottom: 1rem;

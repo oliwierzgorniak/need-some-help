@@ -11,15 +11,15 @@
     <form method="post" class="auth__form">
       <label class="auth__label">
         Name
-        <input asp-for="Input.Name" required />
+        <input asp-for="Input.Name" required class="auth__input" />
       </label>
       <label class="auth__label">
         Email
-        <input asp-for="Input.Email" required type="email" />
+        <input asp-for="Input.Email" required type="email" class="auth__input" />
       </label>
       <label class="auth__label">
         Password
-        <input asp-for="Input.Password" type="password" required type="password" />
+        <input asp-for="Input.Password" type="password" required type="password" class="auth__input" />
       </label>
       <button type="submit" class="auth__submit">Register</button>
       @if (!ModelState.IsValid)

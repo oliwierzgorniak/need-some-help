@@ -1,0 +1,108 @@
+@page "/my-profile/wallet"
+@using NeedSomeHelp.Data
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
+
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@using Solnet.Rpc;
+@using Solnet.Programs;
+@using Solnet.Wallet;
+
+<div class="container">
+  <a href="/my-profile" class="arrow-back">
+    <RadzenIcon Icon="arrow_back" />
+  </a>
+
+  <!-- Wallet Connection Status -->
+  @if (string.IsNullOrEmpty(userWalletAddress))
+  {
+    <RadzenText Text="Connecting your wallet allows other users to send you tips for your help." class="message" />
+    <RadzenButton Text="Connect Wallet" Click="ConnectWallet" />
+  }
+  else
+  {
+    <RadzenText Text="@($"Connected: {ShortenAddress(userWalletAddress)}")" />
+    <RadzenText style="font-weight: bold; color: var(--rz-primary);">Balance: @userBalance.ToString("F4") SOL
+    </RadzenText>
+  }
+
+  @if (!string.IsNullOrEmpty(statusMessage))
+  {
+    <RadzenText TextStyle="TextStyle.Caption" Style="text-align: center; color: var(--rz-danger);">@statusMessage
+    </RadzenText>
+  }
+</div>
+
+@code {
+  // Wallet State
+  private string userWalletAddress = "";
+  private double userBalance = 0;
+  private string statusMessage = "";
+
+  private async Task AddWalletToDb(string walletAddress)
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    var appUser = await UserManager.GetUserAsync(user);
+
+    if (appUser != null)
+    {
+      appUser.Wallet = walletAddress;
+      await UserManager.UpdateAsync(appUser);
+    }
+  }
+
+  private async Task ConnectWallet()
+  {
+    try
+    {
+      statusMessage = "";
+      // 1. Call JS to connect to Brave/Phantom
+      userWalletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
+
+      if (!string.IsNullOrEmpty(userWalletAddress))
+      {
+        // Save to DB
+        await AddWalletToDb(userWalletAddress);
+
+        // 2. Access Localnet RPC to get balance
+        // Use the Surfpool URL (Default standard is 127.0.0.1:8899)
+        var rpcClient = ClientFactory.GetClient("http://127.0.0.1:8899");
+        var balanceResult = await rpcClient.GetBalanceAsync(userWalletAddress);
+
+        if (balanceResult.WasSuccessful)
+        {
+          // Convert Lamports (10^-9) to SOL
+          userBalance = (double)balanceResult.Result.Value / 1_000_000_000;
+        }
+        else
+        {
+          statusMessage = "Could not fetch balance from Localnet. Is Surfpool running?";
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      statusMessage = $"Connection failed: {ex.Message} (Is network set to Localhost?)";
+      Console.WriteLine(ex);
+    }
+  }
+
+  private string ShortenAddress(string address)
+  {
+    if (address.Length < 10) return address;
+    return $"{address.Substring(0, 4)}...{address.Substring(address.Length - 4)}";
+  }
+}

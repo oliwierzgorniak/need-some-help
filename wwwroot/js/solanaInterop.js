@@ -20,4 +20,51 @@ window.solanaInterop = {
       return null;
     }
   },
+
+  sendTip: async (recipientAddress, amountSol) => {
+    const provider = window.solana;
+    if (!provider) throw new Error("Wallet not found");
+
+    try {
+      if (!provider.isConnected) {
+        await provider.connect();
+      }
+
+      // 1. Establish connection to cluster (User's choice or fallback to Localhost)
+      // Note: Ideally, we should let the user/app configure the endpoint passed here.
+      // For this project, we hardcode localhost per requirements, but mainnet-beta is common.
+      const connection = new solanaWeb3.Connection(
+        "http://127.0.0.1:8899",
+        "confirmed",
+      );
+
+      // 2. Create Transaction
+      const transaction = new solanaWeb3.Transaction();
+      const recipientPubKey = new solanaWeb3.PublicKey(recipientAddress);
+
+      const sendSolInstruction = solanaWeb3.SystemProgram.transfer({
+        fromPubkey: provider.publicKey,
+        toPubkey: recipientPubKey,
+        lamports: amountSol * 1_000_000_000, // Convert SOL to Lamports
+      });
+
+      transaction.add(sendSolInstruction);
+
+      // 3. Get latest blockhash (Required for transaction to be valid)
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = provider.publicKey;
+
+      // 4. Request Signature from Wallet
+      const { signature } = await provider.signAndSendTransaction(transaction);
+
+      // 5. Confirm Transaction (Optional but recommended so UI knows it landed)
+      // await connection.confirmTransaction(signature);
+
+      return signature;
+    } catch (err) {
+      console.error("Transaction failed", err);
+      throw err;
+    }
+  },
 };

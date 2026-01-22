@@ -13,17 +13,27 @@
   text-decoration: none;
 }
 
+.wallet-info {
+  text-align: center;
+  color: var(--rz-text-secondary-color);
+  font-size: 0.875rem;
+}
+
+.wallet-info__amount {
+  font-weight: bold;
+  color: var(--rz-primary);
+}
+
 ::deep .container {
   margin-bottom: 1.9rem;
 }
 
 ::deep .tip-amount-input {
-  background: none;
-  border: none;
-  border-bottom: 0.1rem solid var(--material-theme-sys-light-on-background);
+  /* background: none; */
+  /* border: none; */
+  /* border-bottom: 0.1rem solid var(--material-theme-sys-light-on-background); */
   text-align: center;
   width: 8ch;
-  padding-bottom: 0.5rem;
   font-size: 2.4rem;
 }
 
