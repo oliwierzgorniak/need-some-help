@@ -40,7 +40,6 @@
             class="description-text" />
         <div class="divider"></div>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.7rem">
-            <RadzenImage Path="assets/users/1.png" class="avatar" />
             <RadzenStack Gap="0.4rem" class="user-info-flex">
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.7rem" AlignItems="AlignItems.Center">
                     <RadzenText Text="@(owner?.Name ?? owner?.UserName ?? "User")" TextStyle="TextStyle.H5"
@@ -54,11 +53,12 @@
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.45rem">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.15rem">
                         <RadzenIcon Icon="star" class="star-icon" />
-                        <RadzenText Text="4.9" TextStyle="TextStyle.Body1" class="rating-text" />
+                        <RadzenText Text="@ReviewRating.ToString("F1")" TextStyle="TextStyle.Body1"
+                            class="rating-text" />
                     </RadzenStack>
-                    <RadzenText Text="22 reviews" TextStyle="TextStyle.Caption" class="reviews-text" />
+                    <RadzenText Text="@($"{ReviewCount} reviews")" TextStyle="TextStyle.Caption" class="reviews-text" />
                 </RadzenStack>
-                <RadzenText Text="Last login: today" TextStyle="TextStyle.Body2" class="login-text" />
+                @* <RadzenText Text="Last login: today" TextStyle="TextStyle.Body2" class="login-text" /> *@
             </RadzenStack>
         </RadzenStack>
         <div class="divider"></div>
@@ -98,6 +98,7 @@
             if (request != null)
             {
                 owner = request.Owner;
+                await HandleReviews(owner);
             }
         }
     }
@@ -139,6 +140,22 @@
 
                 NavigationManager.NavigateTo($"/chat/{request.Id}");
             }
+        }
+    }
+
+    public int ReviewCount = 0;
+    public double ReviewRating = 0.0;
+
+    private async Task HandleReviews(ApplicationUser owner)
+    {
+        var reviews = await DbContext.Reviews
+        .Where(r => r.RevieweeId == owner.Id)
+        .ToListAsync();
+
+        ReviewCount = reviews.Count;
+        if (ReviewCount > 0)
+        {
+            ReviewRating = reviews.Average(r => r.Rating);
         }
     }
 }
