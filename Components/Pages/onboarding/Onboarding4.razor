@@ -5,6 +5,19 @@
 @rendermode RenderMode.InteractiveServer
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using NeedSomeHelp.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@using Solnet.Rpc;
+@using Solnet.Programs;
+@using Solnet.Wallet;
 
 <!-- Layout matches Figma Node 62:8180 -->
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="1.9rem"
@@ -46,11 +59,18 @@
 @code {
     async Task ConnectWallet()
     {
-        @* var walletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
-        if (!string.IsNullOrEmpty(walletAddress))
-        {
+        var userWalletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
 
-        } *@
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var appUser = await UserManager.GetUserAsync(user);
+
+        if (appUser != null)
+        {
+            appUser.Wallet = userWalletAddress;
+            await UserManager.UpdateAsync(appUser);
+        }
 
         await CompleteOnboarding();
     }

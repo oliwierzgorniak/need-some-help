@@ -1,0 +1,122 @@
+@page "/profile/{UserId}/reviews"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using NeedSomeHelp.Data
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+<PageTitle>@($"Reviews for {userName}")</PageTitle>
+
+<div class="scroll-content">
+  <RadzenStack Gap="1rem">
+    <a href="@($"/profile/{UserId}")" class="arrow-back">
+      <RadzenIcon Icon="arrow_back" />
+    </a>
+    <RadzenText TextStyle="TextStyle.H5" class="title">Reviews for @userName
+    </RadzenText>
+
+    @if (isLoading)
+    {
+      <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
+        class="loading-spinner" />
+    }
+    else if (!reviews.Any())
+    {
+      <RadzenText Text="No reviews yet." TextStyle="TextStyle.Body1" class="empty-state-text" />
+    }
+    else
+    {
+      @foreach (var review in reviews)
+      {
+        <RadzenCard class="review-card">
+          <RadzenStack Gap="0.8rem">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+              AlignItems="AlignItems.Center">
+              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.ReviewerName</RadzenText>
+              <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem">
+                @if (!string.IsNullOrEmpty(review.BlockchainSignature))
+                {
+                  <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" class="rz-mr-2"
+                    title="@($"Verified on Blockchain\nSig: {review.BlockchainSignature}")">
+                    <RadzenIcon Icon="verified" />
+                    <span>On-Chain</span>
+                  </RadzenBadge>
+                }
+                <RadzenRating Value="@review.Rating" ReadOnly="true" class="rating" />
+              </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+              AlignItems="AlignItems.Start">
+              <RadzenText TextStyle="TextStyle.Body2" class="content">@review.Content</RadzenText>
+
+              <RadzenText TextStyle="TextStyle.Caption" class="created-info">
+                @review.CreatedAt.ToString("MMM dd, yyyy")
+              </RadzenText>
+            </RadzenStack>
+          </RadzenStack>
+        </RadzenCard>
+      }
+    }
+  </RadzenStack>
+</div>
+
+@code {
+  [Parameter]
+  public string UserId { get; set; } = string.Empty;
+
+  private bool isLoading = true;
+  private string userName = "User";
+  private List<ReviewItem> reviews = new();
+
+  private class ReviewItem
+  {
+    public int Id { get; set; }
+    public string ReviewerId { get; set; } = string.Empty;
+    public string ReviewerName { get; set; } = "Unknown";
+    public int Rating { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string? BlockchainSignature { get; set; }
+    public DateTime CreatedAt { get; set; }
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    if (string.IsNullOrEmpty(UserId))
+    {
+      isLoading = false;
+      return;
+    }
+
+    // 1. Get the name of the user whose reviews we are viewing
+    var profileUser = await DbContext.Users.FindAsync(UserId);
+    if (profileUser != null)
+    {
+      userName = profileUser.Name ?? profileUser.UserName ?? "User";
+    }
+
+    // 2. Fetch reviews where RevieweeId == UserId
+    reviews = await DbContext.Reviews
+    .Where(r => r.RevieweeId == UserId)
+    .Include(r => r.Reviewer)
+    .OrderByDescending(r => r.CreatedAt)
+    .Select(r => new ReviewItem
+    {
+      Id = r.Id,
+      ReviewerId = r.ReviewerId,
+      ReviewerName = r.Reviewer.Name ?? r.Reviewer.UserName ?? "Unknown",
+      Rating = r.Rating,
+      Content = r.Content,
+      BlockchainSignature = r.BlockchainReference,
+      CreatedAt = r.CreatedAt
+    })
+    .ToListAsync();
+
+    isLoading = false;
+  }
+}

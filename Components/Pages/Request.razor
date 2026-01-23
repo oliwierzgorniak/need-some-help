@@ -17,9 +17,7 @@
 <div class="request-container">
     <RadzenButton Icon="arrow_back" Class="back-button" ButtonStyle="ButtonStyle.Secondary" Style="min-width: auto;"
         Click="@(() => NavigationManager.NavigateTo("/"))" />
-    @* <a href="/" class="back-button">
-        <RadzenIcon Icon="arrow_back" class="back-icon" />
-    </a> *@
+
     @if (request != null)
     {
         <RadzenImage Path="@(string.IsNullOrEmpty(request.PhotoUrl) ? "assets/requests/1.png" : request.PhotoUrl)"
