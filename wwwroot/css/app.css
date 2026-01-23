@@ -94,7 +94,7 @@ a {
 .arrow-back {
   position: absolute;
   top: 1rem;
-  left: 1rem;
+  left: var(--screen-padding);
   cursor: pointer;
 }
 

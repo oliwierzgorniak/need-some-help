@@ -1,53 +1,17 @@
 .container {
+  overflow-y: auto;
   padding: 0 var(--screen-padding);
 }
 
-.back-button ::deep i {
-  font-size: 2.3rem;
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+::deep .reviews-container {
+  padding-bottom: 1rem;
 }
 
-::deep .header-section {
-  text-align: center;
+::deep .rating {
+  margin-right: -0.25rem;
 }
 
-::deep .avatar-image {
-  width: 3.5rem;
-  height: 3.5rem;
-  object-fit: cover;
-  border-radius: 50%; /* Rounded as per 31px radius on 49px box */
-}
-
-::deep .user-name {
-  font-weight: 500;
-}
-
-::deep .dropdown {
-  margin-top: 1rem;
-}
-
-::deep .rating-control {
-  margin-left: -0.3rem;
-  margin-top: 1.2rem;
-  margin-bottom: 0.4rem;
-}
-
-::deep .review-input {
-  width: 100%;
-  resize: none;
-  aspect-ratio: 4/2;
-  margin: 0.5rem 0;
-  margin-bottom: 5rem;
-  max-width: 20rem;
-}
-
-::deep .review-button {
-  margin: 0 auto;
-  display: block;
-  position: fixed;
-  bottom: 0.9rem;
-  left: 50%;
-  transform: translateX(-50%);
+::deep .content,
+::deep .created-info {
+  line-height: 1;
 }

@@ -1,4 +1,4 @@
-@page "/profile/{UserId}/reviews"
+@page "/my-profile/received-reviews"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
@@ -13,8 +13,7 @@
 
 <PageTitle>@($"Reviews for {UserName}")</PageTitle>
 
-<ReviewsTemplate BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {UserName}")" IsLoading="@IsLoading"
-  reviews="@reviews" />
+<ReviewsTemplate BackUrl="@($"/my-profile")" Title="Received Reviews" IsLoading="@IsLoading" reviews="@reviews" />
 
 @code {
   [Parameter]
@@ -24,15 +23,7 @@
   private string UserName = "User";
   private List<ReviewsTemplate.ReviewItem> reviews = new();
 
-  private async Task LoadName(string userId)
-  {
-    if (!string.IsNullOrEmpty(userId))
-    {
-      var user = await DbContext.Users.FindAsync(userId);
-      if (user != null)
-        UserName = user.Name ?? user.UserName ?? "User";
-    }
-  }
+
 
   private async Task LoadReviews(string userId)
   {
@@ -55,15 +46,20 @@
 
   protected override async Task OnInitializedAsync()
   {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    var UserProfile = await UserManager.GetUserAsync(user);
+    UserName = UserProfile?.Name ?? UserProfile?.UserName ?? "User";
+
+    var UserId = UserManager.GetUserId(user);
+
     if (string.IsNullOrEmpty(UserId))
     {
       IsLoading = false;
       return;
     }
 
-    await LoadName(UserId);
-
-    // 2. Fetch reviews where RevieweeId == UserId
     await LoadReviews(UserId);
 
     IsLoading = false;

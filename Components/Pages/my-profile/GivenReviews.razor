@@ -1,4 +1,4 @@
-@page "/profile/{UserId}/reviews"
+@page "/my-profile/given-reviews"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
@@ -11,10 +11,9 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext
 
-<PageTitle>@($"Reviews for {UserName}")</PageTitle>
+<PageTitle>@($"Given reviews")</PageTitle>
 
-<ReviewsTemplate BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {UserName}")" IsLoading="@IsLoading"
-  reviews="@reviews" />
+<ReviewsTemplate BackUrl="/my-profile" Title="Given Reviews" IsLoading="@IsLoading" reviews="@reviews" />
 
 @code {
   [Parameter]
@@ -24,27 +23,19 @@
   private string UserName = "User";
   private List<ReviewsTemplate.ReviewItem> reviews = new();
 
-  private async Task LoadName(string userId)
-  {
-    if (!string.IsNullOrEmpty(userId))
-    {
-      var user = await DbContext.Users.FindAsync(userId);
-      if (user != null)
-        UserName = user.Name ?? user.UserName ?? "User";
-    }
-  }
+
 
   private async Task LoadReviews(string userId)
   {
-    // 2. Fetch reviews where RevieweeId == UserId
+    // 2. Fetch reviews where ReviewerId == UserId
     reviews = await DbContext.Reviews
-    .Where(r => r.RevieweeId == userId)
-    .Include(r => r.Reviewer)
+    .Where(r => r.ReviewerId == userId)
+    .Include(r => r.Reviewee)
     .OrderByDescending(r => r.CreatedAt)
     .Select(r => new ReviewsTemplate.ReviewItem
     {
       Id = r.Id,
-      UserName = r.Reviewer.Name ?? r.Reviewer.UserName ?? "Unknown",
+      UserName = r.Reviewee.Name ?? r.Reviewee.UserName ?? "Unknown",
       Rating = r.Rating,
       Content = r.Content,
       BlockchainSignature = r.BlockchainReference,
@@ -55,15 +46,20 @@
 
   protected override async Task OnInitializedAsync()
   {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    @* var UserProfile = await UserManager.GetUserAsync(user); *@
+    @* UserName = UserProfile?.Name ?? UserProfile?.UserName ?? "User"; *@
+
+    var UserId = UserManager.GetUserId(user);
+
     if (string.IsNullOrEmpty(UserId))
     {
       IsLoading = false;
       return;
     }
 
-    await LoadName(UserId);
-
-    // 2. Fetch reviews where RevieweeId == UserId
     await LoadReviews(UserId);
 
     IsLoading = false;

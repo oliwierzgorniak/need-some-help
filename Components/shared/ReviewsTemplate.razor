@@ -11,7 +11,7 @@
 
 
 <div class="container">
-  <SecondLevelHeader BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {userName}")" />
+  <SecondLevelHeader BackUrl="@BackUrl" Title="@Title" />
 
   @if (isLoading)
   {
@@ -24,14 +24,14 @@
   }
   else
   {
-    <RadzenStack Gap="1rem">
+    <RadzenStack Gap="1rem" class="reviews-container">
       @foreach (var review in reviews)
       {
         <RadzenCard class="review-card">
           <RadzenStack Gap="0.8rem">
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
               AlignItems="AlignItems.Center">
-              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.ReviewerName</RadzenText>
+              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.UserName</RadzenText>
               <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem">
                 @if (!string.IsNullOrEmpty(review.BlockchainSignature))
                 {
@@ -62,10 +62,10 @@
 
 @code {
   [Parameter]
-  public string UserId { get; set; } = string.Empty;
+  public string Title { get; set; } = "Title";
 
   [Parameter]
-  public string userName { get; set; } = "User";
+  public string BackUrl { get; set; } = "/";
 
   [Parameter]
   public bool isLoading { get; set; } = true;
@@ -76,8 +76,7 @@
   public class ReviewItem
   {
     public int Id { get; set; }
-    public string ReviewerId { get; set; } = string.Empty;
-    public string ReviewerName { get; set; } = "Unknown";
+    public string UserName { get; set; } = "Unknown";
     public int Rating { get; set; }
     public string Content { get; set; } = string.Empty;
     public string? BlockchainSignature { get; set; }
