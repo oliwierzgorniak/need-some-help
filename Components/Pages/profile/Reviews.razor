@@ -5,103 +5,42 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @using NeedSomeHelp.Data
+@using NeedSomeHelp.Components.shared
 @attribute [Authorize]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext
 
-<PageTitle>@($"Reviews for {userName}")</PageTitle>
+<PageTitle>@($"Reviews for {UserName}")</PageTitle>
 
-<div class="scroll-content">
-  <RadzenStack Gap="1rem">
-    <SecondLevelHeader BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {userName}")" />
-
-    @if (isLoading)
-    {
-      <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
-        class="loading-spinner" />
-    }
-    else if (!reviews.Any())
-    {
-      <RadzenText Text="No reviews yet." TextStyle="TextStyle.Body1" class="empty-state-text" />
-    }
-    else
-    {
-      @foreach (var review in reviews)
-      {
-        <RadzenCard class="review-card">
-          <RadzenStack Gap="0.8rem">
-            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
-              AlignItems="AlignItems.Center">
-              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.ReviewerName</RadzenText>
-              <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem">
-                @if (!string.IsNullOrEmpty(review.BlockchainSignature))
-                {
-                  <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" class="rz-mr-2"
-                    title="@($"Verified on Blockchain\nSig: {review.BlockchainSignature}")">
-                    <RadzenIcon Icon="verified" />
-                    <span>On-Chain</span>
-                  </RadzenBadge>
-                }
-                <RadzenRating Value="@review.Rating" ReadOnly="true" class="rating" />
-              </RadzenStack>
-            </RadzenStack>
-
-            <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
-              AlignItems="AlignItems.Start">
-              <RadzenText TextStyle="TextStyle.Body2" class="content">@review.Content</RadzenText>
-
-              <RadzenText TextStyle="TextStyle.Caption" class="created-info">
-                @review.CreatedAt.ToString("MMM dd, yyyy")
-              </RadzenText>
-            </RadzenStack>
-          </RadzenStack>
-        </RadzenCard>
-      }
-    }
-  </RadzenStack>
-</div>
+<ReviewsTemplate UserId="@UserId" IsLoading="@IsLoading" reviews="@reviews" userName="@UserName" />
 
 @code {
   [Parameter]
   public string UserId { get; set; } = string.Empty;
 
-  private bool isLoading = true;
-  private string userName = "User";
-  private List<ReviewItem> reviews = new();
+  private bool IsLoading = true;
+  private string UserName = "User";
+  private List<ReviewsTemplate.ReviewItem> reviews = new();
 
-  private class ReviewItem
+  private async Task LoadName(string userId)
   {
-    public int Id { get; set; }
-    public string ReviewerId { get; set; } = string.Empty;
-    public string ReviewerName { get; set; } = "Unknown";
-    public int Rating { get; set; }
-    public string Content { get; set; } = string.Empty;
-    public string? BlockchainSignature { get; set; }
-    public DateTime CreatedAt { get; set; }
+    if (!string.IsNullOrEmpty(userId))
+    {
+      var user = await DbContext.Users.FindAsync(userId);
+      if (user != null)
+        UserName = user.Name ?? user.UserName ?? "User";
+    }
   }
 
-  protected override async Task OnInitializedAsync()
+  private async Task LoadReviews(string userId)
   {
-    if (string.IsNullOrEmpty(UserId))
-    {
-      isLoading = false;
-      return;
-    }
-
-    // 1. Get the name of the user whose reviews we are viewing
-    var profileUser = await DbContext.Users.FindAsync(UserId);
-    if (profileUser != null)
-    {
-      userName = profileUser.Name ?? profileUser.UserName ?? "User";
-    }
-
     // 2. Fetch reviews where RevieweeId == UserId
     reviews = await DbContext.Reviews
-    .Where(r => r.RevieweeId == UserId)
+    .Where(r => r.RevieweeId == userId)
     .Include(r => r.Reviewer)
     .OrderByDescending(r => r.CreatedAt)
-    .Select(r => new ReviewItem
+    .Select(r => new ReviewsTemplate.ReviewItem
     {
       Id = r.Id,
       ReviewerId = r.ReviewerId,
@@ -112,7 +51,21 @@
       CreatedAt = r.CreatedAt
     })
     .ToListAsync();
+  }
 
-    isLoading = false;
+  protected override async Task OnInitializedAsync()
+  {
+    if (string.IsNullOrEmpty(UserId))
+    {
+      IsLoading = false;
+      return;
+    }
+
+    await LoadName(UserId);
+
+    // 2. Fetch reviews where RevieweeId == UserId
+    await LoadReviews(UserId);
+
+    IsLoading = false;
   }
 }

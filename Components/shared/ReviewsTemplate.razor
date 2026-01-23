@@ -1,0 +1,86 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using NeedSomeHelp.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+
+
+<div class="container">
+  <SecondLevelHeader BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {userName}")" />
+
+  @if (isLoading)
+  {
+    <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
+      class="loading-spinner" />
+  }
+  else if (!reviews.Any())
+  {
+    <RadzenText Text="No reviews yet." TextStyle="TextStyle.Body1" class="empty-state-text" />
+  }
+  else
+  {
+    <RadzenStack Gap="1rem">
+      @foreach (var review in reviews)
+      {
+        <RadzenCard class="review-card">
+          <RadzenStack Gap="0.8rem">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+              AlignItems="AlignItems.Center">
+              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.ReviewerName</RadzenText>
+              <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem">
+                @if (!string.IsNullOrEmpty(review.BlockchainSignature))
+                {
+                  <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" class="rz-mr-2"
+                    title="@($"Verified on Blockchain\nSig: {review.BlockchainSignature}")">
+                    <RadzenIcon Icon="verified" />
+                    <span>On-Chain</span>
+                  </RadzenBadge>
+                }
+                <RadzenRating Value="@review.Rating" ReadOnly="true" class="rating" />
+              </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+              AlignItems="AlignItems.Start">
+              <RadzenText TextStyle="TextStyle.Body2" class="content">@review.Content</RadzenText>
+
+              <RadzenText TextStyle="TextStyle.Caption" class="created-info">
+                @review.CreatedAt.ToString("MMM dd, yyyy")
+              </RadzenText>
+            </RadzenStack>
+          </RadzenStack>
+        </RadzenCard>
+      }
+    </RadzenStack>
+  }
+</div>
+
+@code {
+  [Parameter]
+  public string UserId { get; set; } = string.Empty;
+
+  [Parameter]
+  public string userName { get; set; } = "User";
+
+  [Parameter]
+  public bool isLoading { get; set; } = true;
+
+  [Parameter]
+  public List<ReviewItem> reviews { get; set; } = new();
+
+  public class ReviewItem
+  {
+    public int Id { get; set; }
+    public string ReviewerId { get; set; } = string.Empty;
+    public string ReviewerName { get; set; } = "Unknown";
+    public int Rating { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string? BlockchainSignature { get; set; }
+    public DateTime CreatedAt { get; set; }
+  }
+}
