@@ -5,11 +5,6 @@
   background-color: var(--rz-base-background-color);
 }
 
-::deep .title {
-  text-align: center;
-  margin: 0.3rem auto 1rem auto;
-}
-
 .arrow-back {
   color: var(--rz-text-title-color);
   text-decoration: none;

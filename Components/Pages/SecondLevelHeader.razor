@@ -1,0 +1,15 @@
+<div class="container">
+  <a href="@BackUrl" class="header-arrow-back">
+    <RadzenIcon Icon="arrow_back" />
+  </a>
+  <RadzenText TextStyle="TextStyle.H5" class="title">@Title
+  </RadzenText>
+</div>
+
+@code {
+  [Parameter]
+  public string BackUrl { get; set; } = string.Empty;
+
+  [Parameter]
+  public string Title { get; set; } = "Title";
+}

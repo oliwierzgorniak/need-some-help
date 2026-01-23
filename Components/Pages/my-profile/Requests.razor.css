@@ -1,0 +1,7 @@
+.container {
+  padding: 0 var(--screen-padding);
+}
+
+::deep .arrow {
+  font-size: var(--arrow-back-font-size);
+}

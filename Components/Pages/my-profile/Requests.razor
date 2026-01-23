@@ -1,0 +1,85 @@
+@page "/my-profile/requests"
+@using Microsoft.EntityFrameworkCore
+@using NeedSomeHelp.Data
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@* @using NeedSomeHelp.Components.Pages
+@using NeedSomeHelp.Components.Layout *@
+
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+<PageTitle>My requests</PageTitle>
+
+@if (isLoading)
+{
+  <div class="loading-container">
+    <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate"
+      Size="ProgressBarCircularSize.Medium" />
+  </div>
+}
+else
+{
+  <div class="container">
+    <SecondLevelHeader BackUrl="/my-profile" Title="My requests" />
+    <RadzenStack Gap="1rem" class="cards-container">
+      @foreach (var request in requests)
+      {
+        <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" PhotoUrl="@request.PhotoUrl" />
+      }
+    </RadzenStack>
+  </div>
+}
+
+@code {
+  private bool isLoading = true;
+
+  private class RequestItem
+  {
+    public int Id { get; set; }
+    public required string Title { get; set; }
+    public required string Location { get; set; }
+    public string? PhotoUrl { get; set; }
+  }
+
+  private List<RequestItem> requests = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity?.IsAuthenticated == false)
+      return;
+
+    {
+      var userId = UserManager.GetUserId(user);
+      if (string.IsNullOrEmpty(userId)) return;
+
+
+      // Fetch HelpRequests from the database
+      var dbRequests = await DbContext.HelpRequests
+      .Where(r => r.OwnerId == userId)
+      .OrderByDescending(r => r.CreatedAt)
+      .ToListAsync();
+
+      requests = dbRequests.Select(r => new RequestItem
+      {
+        Id = r.Id,
+        Title = r.Title,
+        Location = r.Location,
+        PhotoUrl = r.PhotoUrl
+      }).ToList();
+
+      isLoading = false;
+    }
+  }
+}

@@ -14,11 +14,7 @@
 
 <div class="scroll-content">
   <RadzenStack Gap="1rem">
-    <a href="@($"/profile/{UserId}")" class="arrow-back">
-      <RadzenIcon Icon="arrow_back" />
-    </a>
-    <RadzenText TextStyle="TextStyle.H5" class="title">Reviews for @userName
-    </RadzenText>
+    <SecondLevelHeader BackUrl="@($"/profile/{UserId}")" Title="@($"Reviews for {userName}")" />
 
     @if (isLoading)
     {

@@ -77,6 +77,8 @@
   /* MINE */
   --screen-padding: 0.6875rem;
   --arrow-back-font-size: 2.3rem;
+  --divider-border: 0.05rem solid
+    var(--material-theme-sys-light-outline-variant);
 }
 
 a {
