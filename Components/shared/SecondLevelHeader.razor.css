@@ -2,10 +2,13 @@
   display: grid;
   grid-template-columns: 1fr max-content 1fr;
   align-items: center;
-  /* margin: var(--screen-padding); */
-  padding: 1rem 0 0.8rem 0;
+  padding: 1rem var(--screen-padding) 0.8rem var(--screen-padding);
   border-bottom: var(--divider-border);
   margin-bottom: 1.5rem;
+  position: sticky;
+  top: 0;
+  background-color: var(--material-theme-sys-light-background);
+  z-index: 10;
 }
 
 .header-arrow-back {
