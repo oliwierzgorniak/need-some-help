@@ -23,7 +23,7 @@
 
 ::deep .photo-upload-area {
   background-color: var(--material-theme-sys-light-secondary-container);
-  padding: 4rem 2rem;
+  padding: 3.5rem 2rem 2.8rem 2rem;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -34,9 +34,9 @@
   cursor: pointer;
   border: none;
   border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  aspect-ratio: 1/1;
   display: flex;
+  padding: 1rem;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -52,7 +52,7 @@
 }
 
 ::deep .upload-icon {
-  font-size: 3rem;
+  font-size: 2.7rem;
   color: var(--material-theme-sys-light-on-secondary);
 }
 
