@@ -30,12 +30,12 @@ else
 {
   <div class="container">
     <SecondLevelHeader BackUrl="/my-profile" Title="My requests" />
-    <RadzenStack Gap="1rem" class="cards-container">
+    <div class="cards-container">
       @foreach (var request in requests)
       {
         <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" PhotoUrl="@request.PhotoUrl" />
       }
-    </RadzenStack>
+    </div>
   </div>
 }
 

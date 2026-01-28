@@ -56,7 +56,10 @@
   gap: 1rem;
   margin-bottom: 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--request-card-width), 1fr)
+  );
   /* justify-content: center; */
 }
 

@@ -80,6 +80,7 @@
   --divider-border: 0.05rem solid
     var(--material-theme-sys-light-outline-variant);
   --max-content-width: 40rem;
+  --request-card-width: 18rem;
 }
 
 a {

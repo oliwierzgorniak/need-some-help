@@ -1,6 +1,12 @@
-::deep .cards-container {
+.cards-container {
   margin-bottom: 3rem;
   padding: 0 var(--screen-padding);
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--request-card-width), 1fr)
+  );
+  gap: 1rem;
 }
 
 ::deep .arrow {
