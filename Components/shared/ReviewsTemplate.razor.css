@@ -1,6 +1,7 @@
 ::deep .reviews-container {
-  margin-bottom: 3rem;
   padding: 0 var(--screen-padding);
+  max-width: var(--max-content-width);
+  margin: 0 auto 3rem auto;
 }
 
 ::deep .rating {
