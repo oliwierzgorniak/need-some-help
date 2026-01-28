@@ -56,13 +56,23 @@ else
         }
         else
         {
-            <RadzenStack Gap="1rem" class="cards-container">
+            @* <RadzenStack Gap="1rem" class="cards-container">
                 @foreach (var request in requests)
                 {
                     <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
                         PhotoUrl="@request.PhotoUrl" />
                 }
-            </RadzenStack>
+            </RadzenStack> *@
+            <div class="cards-grid">
+                @foreach (var request in requests.Skip(skip).Take(pageSize))
+                {
+                    <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
+                        PhotoUrl="@request.PhotoUrl" />
+                }
+            </div>
+            
+            <RadzenPager Count="@requests.Count" PageSize="@pageSize" PageChanged="@OnPageChanged" 
+                        Density="Density.Compact" HorizontalAlign="HorizontalAlign.Center" />
         }
         <Nav />
     </div>
@@ -70,6 +80,15 @@ else
 
 @code {
     private bool isChecking = true;
+    
+    // Pagination state
+    private int pageSize = 10;
+    private int skip = 0;
+
+    private void OnPageChanged(PagerEventArgs args)
+    {
+        skip = args.Skip;
+    }
 
     private class RequestItem
     {

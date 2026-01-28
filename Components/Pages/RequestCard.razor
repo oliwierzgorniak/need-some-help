@@ -1,16 +1,13 @@
-<a href="@($"request/{Id}")">
-    <RadzenStack Gap="0.625em"
-        Style="background-color: var(--material-theme-sys-light-surface); border: 1px solid var(--material-theme-sys-light-outline-variant); border-radius: 0.25rem; padding: 0.625rem;">
+<a href="@($"request/{Id}")" class="link">
+    <RadzenStack Gap="0.625em" class="card-container">
         <!-- Image Container -->
         <RadzenImage Path="@(string.IsNullOrEmpty(PhotoUrl) ? "assets/request-no-picture.jpg" : PhotoUrl)"
-            Style="width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 0.25rem;"
-            AlternateText="Help request image" />
+            class="request-image" AlternateText="Help request image" />
         <!-- Content -->
-        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <RadzenText Text="@Title" TextStyle="TextStyle.H4"
-                Style="color: var(--material-theme-sys-light-on-surface); font-weight: 600;" />
-            <RadzenText Text="@Location" TextStyle="TextStyle.Body1"
-                Style="color: var(--material-theme-sys-light-on-surface-variant); margin: 0;" />
+        <div class="content">
+            <RadzenText Text="@Title" TextStyle="TextStyle.H5" class="title" />
+            <RadzenText Text="@(Location == "" ? "Location unknown" : Location)" TextStyle="TextStyle.Body1"
+                class="location" />
         </div>
     </RadzenStack>
 </a>
@@ -20,11 +17,16 @@
     public string Title { get; set; } = "Title";
 
     [Parameter]
-    public string Location { get; set; } = "Location";
+    public string Location { get; set; } = "Location unknown";
 
     [Parameter]
     public int Id { get; set; } = 0;
 
     [Parameter]
     public string? PhotoUrl { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine($"RequestCard parameters set: Id={Id}, Title={Title}, Location={Location}, PhotoUrl={PhotoUrl}");
+    }
 }

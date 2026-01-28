@@ -1,0 +1,39 @@
+.link {
+  flex: 1 1 18rem;
+  max-width: 20rem;
+}
+
+::deep .card-container {
+  background-color: var(--material-theme-sys-light-surface);
+  border: 1px solid var(--material-theme-sys-light-outline-variant);
+  border-radius: 0.25rem;
+  padding: 0.625rem;
+}
+
+::deep .request-image {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+::deep .title {
+  color: var(--material-theme-sys-light-on-surface);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+::deep .location {
+  color: var(--material-theme-sys-light-on-surface-variant);
+  margin: 0;
+}
