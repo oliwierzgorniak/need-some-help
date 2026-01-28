@@ -10,6 +10,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Request Details</PageTitle>
 
@@ -69,7 +70,7 @@
         </RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.6rem"
             class="action-buttons-container">
-            <RadzenButton Icon="ios_share" class="action-btn share-btn" />
+            <RadzenButton Click="@OnShareClick" Icon="ios_share" class="action-btn share-btn" />
             <RadzenButton Icon="phone" class="action-btn phone-btn" />
             <RadzenButton Icon="message" class="action-btn message-btn" Click="@OnMessageClick" />
         </RadzenStack>
@@ -154,5 +155,11 @@
         {
             ReviewRating = reviews.Average(r => r.Rating);
         }
+    }
+
+    private Task OnShareClick()
+    {
+        JSRuntime.InvokeVoidAsync("shareInterop.share");
+        return Task.CompletedTask;
     }
 }
