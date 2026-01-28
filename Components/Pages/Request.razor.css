@@ -13,6 +13,8 @@
   background-color: #f1f1f1;
   height: 13.125rem;
   width: 100%;
+  max-width: calc(var(--max-content-width) - var(--screen-padding) * 2);
+  margin: 0 auto;
 }
 
 ::deep .title {
@@ -20,7 +22,9 @@
 }
 
 ::deep .content-stack {
-  padding: 1.5rem 1.25rem;
+  padding: 1.5rem var(--screen-padding) 1.25rem var(--screen-padding);
+  max-width: var(--max-content-width);
+  margin: 0 auto;
 }
 
 .divider {
@@ -74,14 +78,20 @@
   background-color: var(--material-theme-sys-light-background);
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 50%;
   width: 100%;
+  max-width: var(--max-content-width);
+  transform: translateX(-50%);
   padding: 0.5rem var(--screen-padding);
 }
 
 ::deep .share-btn,
-::deep .phone-btn {
+.phone-btn {
   width: 25%;
+}
+
+.phone-btn ::deep button {
+  width: 100%;
 }
 
 ::deep .message-btn {

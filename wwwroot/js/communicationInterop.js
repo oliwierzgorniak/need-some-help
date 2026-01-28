@@ -1,4 +1,4 @@
-window.shareInterop = {
+window.communicationInterop = {
   share: async () => {
     const shareData = {
       url: window.location.href,
@@ -11,5 +11,8 @@ window.shareInterop = {
     } catch (err) {
       console.error(`Error: ${err}`);
     }
+  },
+  call: (phoneNumber) => {
+    window.location.href = `tel:${phoneNumber}`;
   },
 };
