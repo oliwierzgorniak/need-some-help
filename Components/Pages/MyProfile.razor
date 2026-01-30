@@ -12,18 +12,43 @@
 @inject UserManager<ApplicationUser> UserManager
 @using Microsoft.EntityFrameworkCore
 
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@using NeedSomeHelp.Components.Shared
+
 <PageTitle>My Profile</PageTitle>
 
-<div class="profile-container">
-  <RadzenStack Gap="0" class="menu-list">
-    <Header UserId="@loggedInUserId" />
-    <Link Url="@($"/my-profile/requests")" IconText="handshake" Text="Your help requests" />
-    <Link Url="@($"/my-profile/received-reviews")" IconText="reviews" Text="Received reviews" />
-    <Link Url="@($"/my-profile/given-reviews")" IconText="rate_review" Text="Given reviews" />
-    <Link Url="@($"/my-profile/wallet")" IconText="wallet" Text="Your wallet" />
-  </RadzenStack>
-</div>
-<Nav Section="profile"></Nav>
+<AuthorizeView>
+  <Authorized>
+    <div class="profile-container">
+      <RadzenStack Gap="0" class="menu-list">
+        <Header UserId="@loggedInUserId" />
+        <Link Url="@($"/my-profile/requests")" IconText="handshake" Text="Your help requests" />
+        <Link Url="@($"/my-profile/received-reviews")" IconText="reviews" Text="Received reviews" />
+        <Link Url="@($"/my-profile/given-reviews")" IconText="rate_review" Text="Given reviews" />
+        <Link Url="@($"/my-profile/wallet")" IconText="wallet" Text="Your wallet" />
+      </RadzenStack>
+    </div>
+    <Nav Section="profile"></Nav>
+  </Authorized>
+  <NotAuthorized>
+    <div class="login-container">
+      <RadzenStack Gap="1.4rem" AlignItems="AlignItems.Center">
+        <RadzenText TextStyle="TextStyle.H5" Text="You are not logged in" />
+        <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center">
+          <a href="@($"/register?ReturnUrl={Uri.EscapeDataString("/my-profile")}")">
+            <RadzenButton Text="Register" ButtonStyle="ButtonStyle.Primary" />
+          </a>
+          <a href="@($"/login?ReturnUrl={Uri.EscapeDataString("/my-profile")}")">
+            <RadzenButton Text="Login" ButtonStyle="ButtonStyle.Secondary" />
+          </a>
+        </RadzenStack>
+      </RadzenStack>
+    </div>
+    <Nav Section="profile"></Nav>
+  </NotAuthorized>
+</AuthorizeView>
 
 @code {
   private string loggedInUserId = string.Empty;

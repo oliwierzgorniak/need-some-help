@@ -81,6 +81,7 @@
     var(--material-theme-sys-light-outline-variant);
   --max-content-width: 40rem;
   --request-card-width: 18rem;
+  --nav-height: 5rem;
 }
 
 a {
