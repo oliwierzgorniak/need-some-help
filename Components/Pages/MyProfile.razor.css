@@ -5,17 +5,6 @@
   margin: 0 auto;
 }
 
-.login-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: calc(100vh - var(--nav-height));
-  max-width: 100%;
-  padding: var(--screen-padding);
-  text-align: center;
-}
-
 .divider {
   border-top: 1px solid #d8d8d8; /* Assuming based on svg */
   width: 100%;

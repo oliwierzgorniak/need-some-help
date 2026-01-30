@@ -12,39 +12,48 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext
+@using NeedSomeHelp.Components.Shared
 
 <PageTitle>Chats</PageTitle>
 
-<div class="scroll-content">
-    <RadzenStack Gap="1rem">
-        @if (isLoading)
-        {
-            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
-                class="loading-spinner" />
-        }
-        else if (!chatItems.Any())
-        {
-            <RadzenText Text="No active chats." TextStyle="TextStyle.Body1" class="empty-state-text" />
-        }
-        else
-        {
-            @foreach (var chat in chatItems)
-            {
-                <a href="@($"chat/{chat.RequestId}")" class="chat-link">
-                    <RadzenStack Gap="0.2rem" class="text-content">
-                        <RadzenText Text="@chat.OtherUserName" TextStyle="TextStyle.H5" class="user-name" />
-                        <RadzenText Text="@chat.RequestTitle" TextStyle="TextStyle.Body2" class="request-title" />
-                    </RadzenStack>
-                    <a href="@($"profile/{chat.OtherUserId}")">
-                        <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Primary" class="icon-button" />
-                    </a>
-                </a>
-                <div class="divider"></div>
-            }
-        }
-    </RadzenStack>
-</div>
-<Nav Section="chats" />
+<AuthorizeView>
+    <Authorized>
+        <div class="scroll-content">
+            <RadzenStack Gap="1rem">
+                @if (isLoading)
+                {
+                    <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium"
+                        class="loading-spinner" />
+                }
+                else if (!chatItems.Any())
+                {
+                    <RadzenText Text="No active chats." TextStyle="TextStyle.Body1" class="empty-state-text" />
+                }
+                else
+                {
+                    @foreach (var chat in chatItems)
+                    {
+                        <a href="@($"chat/{chat.RequestId}")" class="chat-link">
+                            <RadzenStack Gap="0.2rem" class="text-content">
+                                <RadzenText Text="@chat.OtherUserName" TextStyle="TextStyle.H5" class="user-name" />
+                                <RadzenText Text="@chat.RequestTitle" TextStyle="TextStyle.Body2" class="request-title" />
+                            </RadzenStack>
+                            <a href="@($"profile/{chat.OtherUserId}")">
+                                <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Primary" class="icon-button" />
+                            </a>
+                        </a>
+                        <div class="divider"></div>
+                    }
+                }
+            </RadzenStack>
+        </div>
+        <Nav Section="chats" />
+    </Authorized>
+    <NotAuthorized>
+        <LoginInfo />
+        <Nav Section="chats" />
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private bool isLoading = true;

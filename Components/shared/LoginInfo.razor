@@ -1,0 +1,24 @@
+@inject NavigationManager NavigationManager
+
+<div class="login-container">
+  <RadzenStack Gap="1.4rem" AlignItems="AlignItems.Center">
+    <RadzenText TextStyle="TextStyle.H5" Text="You are not logged in" />
+    <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center">
+      <a href="@($"/register?ReturnUrl={Uri.EscapeDataString(_returnUrl)}")">
+        <RadzenButton Text="Register" ButtonStyle="ButtonStyle.Primary" />
+      </a>
+      <a href="@($"/login?ReturnUrl={Uri.EscapeDataString(_returnUrl)}")">
+        <RadzenButton Text="Login" ButtonStyle="ButtonStyle.Secondary" />
+      </a>
+    </RadzenStack>
+  </RadzenStack>
+</div>
+
+@code {
+  private string _returnUrl = "/";
+
+  protected override void OnInitialized()
+  {
+    _returnUrl = "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+  }
+}
