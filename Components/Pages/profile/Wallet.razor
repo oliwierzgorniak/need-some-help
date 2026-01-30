@@ -75,6 +75,7 @@
       if (!string.IsNullOrEmpty(userWalletAddress))
       {
         // Save to DB
+        Console.WriteLine($"Connected wallet: {userWalletAddress}");
         await AddWalletToDb(userWalletAddress);
 
         // 2. Access Localnet RPC to get balance

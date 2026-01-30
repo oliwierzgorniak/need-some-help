@@ -57,7 +57,9 @@
                 <!-- Description -->
                 <RadzenStack Gap="0.5rem" AlignItems="AlignItems.End" class="description-wrapper">
                     <RadzenFormField Text="Description" Variant="Variant.Outlined" class="full-width">
-                        <RadzenTextArea @bind-Value="@model.Description" Name="Description" Rows="4" MaxLength="400" />
+                        <RadzenTextArea Value="@model.Description"
+                            ValueChanged="@(args => {@model.Description = args;})" Name="Description" Rows="4"
+                            MaxLength="400" />
                     </RadzenFormField>
                     <RadzenText TextStyle="TextStyle.Caption" class="char-count">
                         @(model.Description?.Length ?? 0)/400 max characters
@@ -71,8 +73,9 @@
                             <RadzenFormField Text="Location" Variant="Variant.Outlined" class="location-field">
                                 <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
                             </RadzenFormField>
-                            <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
-                                Click="@GetLocation" class="location-button" />
+                            @* !TODO optional map feature *@
+                            @* <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
+                                Click="@GetLocation" class="location-button" /> *@
                         </RadzenStack>
                     }
                     <!-- Is help remote? -->
@@ -244,7 +247,7 @@
         }
         else
         {
-            NavigationManager.NavigateTo("Identity/Account/Login", true);
+            NavigationManager.NavigateTo("/Login", true);
         }
     }
 

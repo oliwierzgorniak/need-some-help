@@ -1,5 +1,6 @@
 @page "/request/{Id}"
 @inject NavigationManager NavigationManager
+@using Humanizer
 @using Radzen
 @using Radzen.Blazor
 @using Microsoft.AspNetCore.Authorization
@@ -71,13 +72,16 @@
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.6rem"
             class="action-buttons-container">
             <RadzenButton Click="@OnShareClick" Icon="ios_share" class="action-btn share-btn" />
-            @if (!string.IsNullOrEmpty(request?.PhoneNumber))
+            @if (!_isOwnRequest)
             {
-                <a href="@($"tel:{request.PhoneNumber}")" class="phone-btn" Click="@OnPhoneClick">
-                    <RadzenButton Icon="phone" />
-                </a>
+                @if (!string.IsNullOrEmpty(request?.PhoneNumber))
+                {
+                    <a href="@($"tel:{request.PhoneNumber}")" class="phone-btn" Click="@OnPhoneClick">
+                        <RadzenButton Icon="phone" />
+                    </a>
+                }
+                <RadzenButton Icon="message" class="action-btn message-btn" Click="@OnMessageClick" />
             }
-            <RadzenButton Icon="message" class="action-btn message-btn" Click="@OnMessageClick" />
         </RadzenStack>
     </RadzenStack>
 
@@ -104,7 +108,25 @@
                 await HandleReviews(owner);
             }
         }
+
+        await UpdateIsOwnRequest();
     }
+
+    private Boolean _isOwnRequest = false;
+
+    async Task UpdateIsOwnRequest()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true && request != null)
+        {
+            var userId = UserManager.GetUserId(user);
+            _isOwnRequest = userId == request.OwnerId;
+        }
+    }
+
+
 
     async Task AddToChats()
     {
@@ -121,9 +143,6 @@
         {
             var userId = UserManager.GetUserId(user);
 
-            // Don't let users message themselves
-            if (userId == request.OwnerId) return;
-
             var currentUser = await DbContext.Users
             .Include(u => u.ContactedHelpRequests)
             .FirstOrDefaultAsync(u => u.Id == userId);
@@ -135,6 +154,7 @@
                 {
                     currentUser.ContactedHelpRequests.Add(request);
                     await DbContext.SaveChangesAsync();
+                    Console.WriteLine("Added to contacted requests.");
                 }
 
             }

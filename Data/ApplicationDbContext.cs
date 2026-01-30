@@ -51,7 +51,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .UsingEntity<Dictionary<string, object>>(
                 "ContactedHelpRequests",
                 j => j.HasOne<HelpRequest>().WithMany().HasForeignKey("ContactedHelpRequestsId").OnDelete(DeleteBehavior.Restrict), // Prevent cascading delete from Request
-                j => j.HasOne<ApplicationUser>().WithMany().HasForeignKey("ContactedByUsersId").OnDelete(DeleteBehavior.Restrict)   // Prevent cascading delete from User
+                j => j.HasOne<ApplicationUser>().WithMany().HasForeignKey("ContactedByUsersId").OnDelete(DeleteBehavior.Restrict),   // Prevent cascading delete from User
+                j => 
+                {
+                    j.HasKey("ContactedHelpRequestsId", "ContactedByUsersId");
+                }
             );
     }
 }
