@@ -36,9 +36,12 @@
             <RadzenText Text="@(request?.Title ?? "Loading...")" TextStyle="TextStyle.H4" class="title" />
         </RadzenStack>
         <div class="divider"></div>
-        <RadzenText Text="@(request?.Description ?? "Loading...")" TextStyle="TextStyle.Body1"
-            class="description-text" />
-        <div class="divider"></div>
+        @if (request?.Description.Length > 0)
+        {
+            <RadzenText Text="@(request?.Description ?? "Loading...")" TextStyle="TextStyle.Body1"
+                class="description-text" />
+            <div class="divider"></div>
+        }
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.7rem">
             <RadzenStack Gap="0.4rem" class="user-info-flex">
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.7rem" AlignItems="AlignItems.Center">
@@ -135,7 +138,7 @@
 
         if (user.Identity?.IsAuthenticated != true)
         {
-            NavigationManager.NavigateTo("/Login", true);
+            NavigationManager.NavigateTo("/register", true);
             return;
         }
 
