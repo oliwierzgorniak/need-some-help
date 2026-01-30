@@ -18,6 +18,9 @@ public class LoginModel : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
     public class InputModel
     {
         [Required]
@@ -32,14 +35,15 @@ public class LoginModel : PageModel
     {
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
+        returnUrl ??= Url.Content("~/");
         if (ModelState.IsValid)
         {
             var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, isPersistent: true, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return LocalRedirect("/");
+                return LocalRedirect(returnUrl);
             }
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         }

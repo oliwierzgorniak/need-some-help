@@ -20,6 +20,9 @@ public class RegisterModel : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
     public class InputModel
     {
         [Required]
@@ -36,8 +39,9 @@ public class RegisterModel : PageModel
     {
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
+        returnUrl ??= Url.Content("~/");
         if (ModelState.IsValid)
         {
             var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, Name = Input.Name };
@@ -45,7 +49,7 @@ public class RegisterModel : PageModel
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return LocalRedirect("/");
+                return LocalRedirect(returnUrl);
             }
             foreach (var error in result.Errors)
             {

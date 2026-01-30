@@ -1,6 +1,7 @@
 @page "/request/{Id}"
 @inject NavigationManager NavigationManager
 @using Humanizer
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using Radzen
 @using Radzen.Blazor
 @using Microsoft.AspNetCore.Authorization
@@ -82,7 +83,7 @@
                     }
                     else
                     {
-                        <a href="/register" class="phone-btn">
+                        <a href="@($"/register?ReturnUrl={Uri.EscapeDataString(_returnUrl)}")" class="phone-btn">
                             <RadzenButton Icon="phone" />
                         </a>
                     }
@@ -100,6 +101,13 @@
 
     private HelpRequest? request;
     private ApplicationUser? owner;
+
+    private string _returnUrl = "/";
+
+    protected override void OnInitialized()
+    {
+        _returnUrl = "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,6 +151,12 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            NavigationManager.NavigateTo($"/register?ReturnUrl={Uri.EscapeDataString(_returnUrl)}", true);
+            return false;
+        }
 
         if (request != null)
         {

@@ -4,11 +4,11 @@
   ViewData["Title"] = "Register";
 }
 
-
 <main>
   <article class="auth">
     <h1 class="auth__title">Register</h1>
-    <form method="post" class="auth__form">
+    @* We append the ReturnUrl to the form action so it persists on POST *@
+    <form method="post" class="auth__form" asp-route-returnUrl="@Model.ReturnUrl">
       <label class="auth__label">
         Name
         <input asp-for="Input.Name" required class="auth__input" />
@@ -27,6 +27,7 @@
         <div asp-validation-summary="All" class="auth__errors"></div>
       }
     </form>
-    <a href="/login" class="auth__other-link">Login</a>
+    <a href="@(Model.ReturnUrl != null ? $"/login?ReturnUrl={Uri.EscapeDataString(Model.ReturnUrl)}" : "/login")"
+      class="auth__other-link">Login</a>
   </article>
 </main>
