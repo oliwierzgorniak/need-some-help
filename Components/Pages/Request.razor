@@ -47,11 +47,6 @@
                 <RadzenStack Orientation="Orientation.Horizontal" Gap="0.7rem" AlignItems="AlignItems.Center">
                     <RadzenText Text="@(owner?.Name ?? owner?.UserName ?? "User")" TextStyle="TextStyle.H5"
                         TagName="TagName.H2" class="user-name" />
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.15rem"
-                        Style="cursor: pointer;">
-                        <RadzenIcon Icon="flag" class="report-icon icon-filled" />
-                        <RadzenText Text="Report" TextStyle="TextStyle.Caption" class="report-text" />
-                    </RadzenStack>
                 </RadzenStack>
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.45rem">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.15rem">
@@ -79,9 +74,18 @@
             {
                 @if (!string.IsNullOrEmpty(request?.PhoneNumber))
                 {
-                    <a href="@($"tel:{request.PhoneNumber}")" class="phone-btn" Click="@OnPhoneClick">
-                        <RadzenButton Icon="phone" />
-                    </a>
+                    @if (_isAuthenticated)
+                    {
+                        <a href="@($"tel:{request.PhoneNumber}")" @onclick="AddToChats" class="phone-btn">
+                            <RadzenButton Icon="phone" Style="pointer-events: none;" />
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/register" class="phone-btn">
+                            <RadzenButton Icon="phone" />
+                        </a>
+                    }
                 }
                 <RadzenButton Icon="message" class="action-btn message-btn" Click="@OnMessageClick" />
             }
@@ -99,6 +103,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await UpdateIsOwnRequest();
+
         if (int.TryParse(Id, out int requestId))
         {
             request = await DbContext.HelpRequests
@@ -112,17 +118,19 @@
             }
         }
 
-        await UpdateIsOwnRequest();
     }
-
     private Boolean _isOwnRequest = false;
+
+    private bool _isAuthenticated = false;
+
 
     async Task UpdateIsOwnRequest()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
+        _isAuthenticated = user.Identity?.IsAuthenticated == true;
 
-        if (user.Identity?.IsAuthenticated == true && request != null)
+        if (_isAuthenticated && request != null)
         {
             var userId = UserManager.GetUserId(user);
             _isOwnRequest = userId == request.OwnerId;
@@ -131,16 +139,10 @@
 
 
 
-    async Task AddToChats()
+    async Task<Boolean> AddToChats()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated != true)
-        {
-            NavigationManager.NavigateTo("/register", true);
-            return;
-        }
 
         if (request != null)
         {
@@ -159,11 +161,10 @@
                     await DbContext.SaveChangesAsync();
                     Console.WriteLine("Added to contacted requests.");
                 }
-
             }
-
         }
 
+        return true;
     }
 
     async Task OnMessageClick()
@@ -190,9 +191,9 @@
 
     private async Task OnPhoneClick()
     {
-        await AddToChats();
-        @* !TODO hide phone button if phone not available *@
-        Console.WriteLine(request?.PhoneNumber);
+        @* Doesn't continue if add to chats fails *@
+        if (!await AddToChats()) return;
+
         if (!string.IsNullOrEmpty(request?.PhoneNumber))
         {
             await JSRuntime.InvokeVoidAsync("communicationInterop.call", request.PhoneNumber);
