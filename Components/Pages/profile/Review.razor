@@ -9,32 +9,51 @@
 @using Radzen
 @using Radzen.Blazor
 @using Microsoft.EntityFrameworkCore
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Give Review</PageTitle>
 
-<div class="review-container">
+<div class="outer-container">
   <a href="@($"/profile/{UserId}")" class="arrow-back">
     <RadzenIcon Icon="arrow_back" />
   </a>
-  <RadzenStack Gap="0" class="header-section">
-    <RadzenText Text="@userName" TextStyle="TextStyle.H3" class="user-name" />
-    <RadzenDropDown @bind-Value=@selectedHelpRequestId Data=@helpRequests TextProperty="Title" ValueProperty="Id"
-      Name="DropDownBindValue" Placeholder="Select a request..." class="dropdown" />
-  </RadzenStack>
-  <RadzenRating Stars="5" @bind-Value="Rating" class="rating-control" />
-  <RadzenTextArea @bind-Value="ReviewText" class="review-input" Placeholder="Write your review here..." />
-  <RadzenButton Text="Give review" class="review-button" Click="OnGiveReviewClick" />
+  <RadzenTemplateForm Class="form" Data="@model"
+    Submit="@(async (ReviewFormModel args) => await OnGiveReviewClick(args))">
+    <RadzenStack Gap="0" class="header-section">
+      <RadzenText Text="@userName" TextStyle="TextStyle.H3" class="user-name" />
+      <RadzenStack Gap="0.5rem" JustifyContent="JustifyContent.Start">
+        <RadzenDropDown @bind-Value=@model.SelectedHelpRequestId Data=@helpRequests TextProperty="Title"
+          ValueProperty="Id" Name="SelectedHelpRequestId" Placeholder="Select a request..." class="dropdown" />
+        <RadzenRequiredValidator Component="SelectedHelpRequestId" Text="Please select a request" DefaultValue="0" />
+      </RadzenStack>
+    </RadzenStack>
+    <RadzenRating Stars="5" @bind-Value="model.Rating" class="rating-control" Name="Rating" />
+    <RadzenTextArea @bind-Value="model.ReviewText" class="review-input" Placeholder="Write your review here..."
+      Name="ReviewText" />
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+      <RadzenLabel Text="Crypto review" />
+      <RadzenSwitch @bind-Value="model.IsCryptoReview" Style="SwitchStyle.Primary" />
+    </RadzenStack>
+    <RadzenButton ButtonType="ButtonType.Submit" Text="Give review" class="review-button" />
+  </RadzenTemplateForm>
 </div>
 
 @code {
   [Parameter]
   public string UserId { get; set; } = String.Empty;
 
-  public int Rating { get; set; }
-  public string ReviewText { get; set; } = "";
+  class ReviewFormModel
+  {
+    public int Rating { get; set; }
+    public string ReviewText { get; set; } = "";
+    public bool IsCryptoReview { get; set; } = false;
+    public int SelectedHelpRequestId { get; set; }
+  }
+
+  ReviewFormModel model = new ReviewFormModel();
+
   private string userName = "User";
   private List<HelpRequest> helpRequests = new();
-  private int selectedHelpRequestId;
 
   protected override async Task OnInitializedAsync()
   {
@@ -62,10 +81,24 @@
     }
   }
 
-  private async Task OnGiveReviewClick()
+  private string _signature = String.Empty;
+
+  private async Task OnGiveReviewClick(ReviewFormModel args)
   {
-    @* !TODO handle error message *@
-    if (selectedHelpRequestId == 0) return;
+    return;
+
+    if (args.IsCryptoReview)
+    {
+      try
+      {
+        _signature = await JSRuntime.InvokeAsync<string>("solanaInterop.giveReview", args.Rating, args.ReviewText);
+        Console.WriteLine($"Crypto review submitted with signature: {_signature}");
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error during crypto review: {ex.Message}");
+      }
+    }
 
     var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
     var user = authState.User;
@@ -76,12 +109,13 @@
     {
       var review = new NeedSomeHelp.Data.Review
       {
-        Rating = Rating,
-        Content = ReviewText,
+        Rating = args.Rating,
+        Content = args.ReviewText,
         ReviewerId = reviewerId,
         RevieweeId = UserId,
-        HelpRequestId = selectedHelpRequestId == 0 ? null : selectedHelpRequestId,
-        CreatedAt = DateTime.UtcNow
+        HelpRequestId = args.SelectedHelpRequestId,
+        CreatedAt = DateTime.UtcNow,
+        BlockchainReference = _signature
       };
 
       DbContext.Reviews.Add(review);

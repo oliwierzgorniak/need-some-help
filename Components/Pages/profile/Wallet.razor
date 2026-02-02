@@ -71,6 +71,7 @@
       statusMessage = "";
       // 1. Call JS to connect to Brave/Phantom
       userWalletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
+      Console.WriteLine($"Wallet address from JS: {userWalletAddress}");
 
       if (!string.IsNullOrEmpty(userWalletAddress))
       {
@@ -80,7 +81,7 @@
 
         // 2. Access Localnet RPC to get balance
         // Use the Surfpool URL (Default standard is 127.0.0.1:8899)
-        var rpcClient = ClientFactory.GetClient("http://127.0.0.1:8899");
+        var rpcClient = ClientFactory.GetClient("https://api.devnet.solana.com");
         var balanceResult = await rpcClient.GetBalanceAsync(userWalletAddress);
 
         if (balanceResult.WasSuccessful)

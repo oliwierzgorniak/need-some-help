@@ -1,0 +1,16 @@
+[90m[[0m2026-02-02T10:37:03.716424000Z [32mINFO [0m solana_test_validator[90m][0m agave-validator 3.0.13 (src:90098d26; feat:3604001754, client:Agave)
+[90m[[0m2026-02-02T10:37:03.716540000Z [32mINFO [0m solana_test_validator[90m][0m Starting validator with: ArgsOs {
+        inner: [
+            "solana-test-validator",
+            "--clone",
+            "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcQb",
+            "--url",
+            "mainnet-beta",
+            "--reset",
+        ],
+    }
+[90m[[0m2026-02-02T10:37:03.716601000Z [33mWARN [0m solana_perf[90m][0m CUDA is disabled
+[90m[[0m2026-02-02T10:37:03.898874000Z [32mINFO [0m solana_faucet::faucet[90m][0m Faucet started. Listening on: 0.0.0.0:9900
+[90m[[0m2026-02-02T10:37:03.902301000Z [32mINFO [0m solana_faucet::faucet[90m][0m Faucet account address: Ea6jv82WEabU6dGAKZjUjsbjCVUZG9JuWx9vRtfmkumz
+[90m[[0m2026-02-02T10:37:03.899376000Z [32mINFO [0m solana_test_validator[90m][0m Fetching [MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcQb] over RPC...
+[90m[[0m2026-02-02T10:37:03.902378000Z [32mINFO [0m agave_validator::admin_rpc_service[90m][0m started admin rpc service!

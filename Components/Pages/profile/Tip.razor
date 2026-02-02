@@ -94,7 +94,7 @@
       {
         // 2. Access Localnet RPC to get balance
         // Use the Surfpool URL (Default standard is 127.0.0.1:8899)
-        var rpcClient = ClientFactory.GetClient("http://127.0.0.1:8899");
+        var rpcClient = ClientFactory.GetClient("https://api.devnet.solana.com");
         var balanceResult = await rpcClient.GetBalanceAsync(userWalletAddress);
 
         if (balanceResult.WasSuccessful)
