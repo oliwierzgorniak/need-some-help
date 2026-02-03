@@ -58,6 +58,12 @@
   font-size: 0.75rem;
 }
 
+::deep .crypto-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
 ::deep .review-button {
   margin: 0 auto;
   display: block;

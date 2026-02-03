@@ -10,6 +10,7 @@
 @using Radzen.Blazor
 @using Microsoft.EntityFrameworkCore
 @inject IJSRuntime JSRuntime
+@inject TooltipService TooltipService
 
 <PageTitle>Give Review</PageTitle>
 
@@ -36,7 +37,12 @@
       </RadzenText>
     </RadzenStack>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
-      <RadzenLabel Text="Crypto review" />
+      <RadzenLabel class="crypto-switch">
+        <RadzenIcon Icon="info"
+          MouseEnter="@(args => TooltipService.Open(args, "Cryptoreviews are more credible", new TooltipOptions { }))"
+          MouseLeave="@(args => TooltipService.Close())" />
+        Crypto review
+      </RadzenLabel>
       <RadzenSwitch @bind-Value="model.IsCryptoReview" Style="SwitchStyle.Primary" />
     </RadzenStack>
     <RadzenButton ButtonType="ButtonType.Submit" Text="Give review" class="review-button" />
