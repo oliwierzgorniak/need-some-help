@@ -31,9 +31,17 @@ else
   <div class="container">
     <SecondLevelHeader BackUrl="/my-profile" Title="My requests" />
     <div class="cards-container">
-      @foreach (var request in requests)
+      @if (requests.Count == 0)
       {
-        <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" PhotoUrl="@request.PhotoUrl" />
+        <RadzenText Text="You have not created any help requests yet." TextStyle="TextStyle.Body1" class="empty-state-text"
+          TextAlign="TextAlign.Center" />
+      }
+      else
+      {
+        @foreach (var request in requests)
+        {
+          <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title" PhotoUrl="@request.PhotoUrl" />
+        }
       }
     </div>
   </div>

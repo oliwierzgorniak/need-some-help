@@ -17,6 +17,16 @@
   font-size: var(--arrow-back-font-size);
 }
 
+::deep .alert {
+  width: max-content;
+  position: fixed;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background-color: var(--material-theme-sys-light-error-container);
+}
+
 ::deep .form-wrapper {
   padding: 0;
 }
