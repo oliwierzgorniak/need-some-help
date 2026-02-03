@@ -22,7 +22,7 @@
 
 <div class="page-container">
     <a href="/" class="arrow-back">
-        <RadzenIcon Icon="arrow_back" Click="@(() => NavigationManager.NavigateTo("/"))" />
+        <RadzenIcon Icon="arrow_back" />
     </a>
     <RadzenTemplateForm Data="@model" Submit="@(async (RequestFormModel args) => await OnRequestSubmit(args))">
         <RadzenStack Gap="0.7rem" class="form-wrapper">
@@ -60,7 +60,7 @@
                 <RadzenStack Gap="0.5rem" AlignItems="AlignItems.End" class="description-wrapper">
                     <RadzenFormField Text="Description" Variant="Variant.Outlined" class="full-width">
                         <RadzenTextArea Value="@model.Description"
-                            ValueChanged="@(args => {@model.Description = args;})" Name="Description" Rows="4"
+                            ValueChanged="@(args => { @model.Description = args; })" Name="Description" Rows="4"
                             MaxLength="400" />
                     </RadzenFormField>
                     <RadzenText TextStyle="TextStyle.Caption" class="char-count">
@@ -164,7 +164,16 @@
         try
         {
             var file = e.File;
-            var format = "image/jpeg";
+
+            // Allow PNG and WebP to keep their formats, otherwise default/convert to JPEG
+            var format = file.ContentType switch
+            {
+                "image/png" => "image/png",
+                "image/webp" => "image/webp",
+                _ => "image/jpeg"
+            };
+            var extension = format == "image/png" ? ".png" : (format == "image/webp" ? ".webp" : ".jpg");
+
             var resizedImageFile = await file.RequestImageFileAsync(format, 1000, 1000);
 
             var blobServiceClient = new BlobServiceClient(Configuration["Azure:Storage:ConnectionString"]);
@@ -192,7 +201,7 @@
                 }
             }
 
-            var blobName = $"{Guid.NewGuid()}.jpg";
+            var blobName = $"{Guid.NewGuid()}{extension}";
             var blobClient = containerClient.GetBlobClient(blobName);
 
             using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB max

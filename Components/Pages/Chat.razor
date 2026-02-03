@@ -77,41 +77,62 @@
             ProfileUser = await UserManager.GetUserAsync(user);
             if (ProfileUser != null)
             {
-                await LoadChatData();
+                try 
+                {
+                    await LoadChatData();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading chat data: {ex.Message}");
+                    // Fallback to empty list or retry logic if needed
+                }
 
                 if (!string.IsNullOrEmpty(otherUserId))
                 {
-                    hubConnection = new HubConnectionBuilder()
-                        .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
-                        .WithAutomaticReconnect()
-                        .Build();
-
-                    hubConnection.On<string, string>("ReceiveMessage", (senderId, content) =>
-                    {
-                        if (senderId != ProfileUser.Id)
-                        {
-                            messages.Add(new ChatMessage 
-                            { 
-                                Text = content, 
-                                IsReceived = true, 
-                                Timestamp = DateTime.UtcNow 
-                            });
-                            InvokeAsync(async () => 
-                            {
-                                StateHasChanged();
-                                await ScrollToBottom();
-                            });
-                        }
-                    });
-
-                    await hubConnection.StartAsync();
-                    await hubConnection.SendAsync("JoinChat", RequestId, ProfileUser.Id, otherUserId);
+                    await StartSignalRConnection();
                 }
             }
         }
         else
         {
             NavigationManager.NavigateTo("Identity/Account/Login", true);
+        }
+    }
+
+    private async Task StartSignalRConnection()
+    {
+        try
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+                .WithAutomaticReconnect()
+                .Build();
+
+            hubConnection.On<string, string>("ReceiveMessage", (senderId, content) =>
+            {
+                if (ProfileUser != null && senderId != ProfileUser.Id)
+                {
+                    messages.Add(new ChatMessage 
+                    { 
+                        Text = content, 
+                        IsReceived = true, 
+                        Timestamp = DateTime.UtcNow 
+                    });
+                    InvokeAsync(async () => 
+                    {
+                        StateHasChanged();
+                        await ScrollToBottom();
+                    });
+                }
+            });
+
+            await hubConnection.StartAsync();
+            await hubConnection.SendAsync("JoinChat", RequestId, ProfileUser!.Id, otherUserId!);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not start SignalR connection: {ex.Message}");
+            // We don't throw here, so the page still works in "offline" mode (just DB)
         }
     }
 
@@ -250,9 +271,16 @@
             DbContext.Messages.Add(newMessage);
             await DbContext.SaveChangesAsync();
 
-            if (hubConnection != null)
+            if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.SendAsync("SendMessage", RequestId, ProfileUser.Id, receiverId, messageInput);
+                try 
+                {
+                    await hubConnection.SendAsync("SendMessage", RequestId, ProfileUser.Id, receiverId, messageInput);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending real-time update: {ex.Message}");
+                }
             }
 
             messages.Add(new ChatMessage { Text = messageInput, IsReceived = false, Timestamp = newMessage.Timestamp });
@@ -263,6 +291,7 @@
 
     private async Task ScrollToBottom()
     {
+        await Task.Delay(100);
         await JSRuntime.InvokeVoidAsync("otherInterop.scrollToBottom", ".chat-messages");
     }
 
@@ -286,7 +315,15 @@
     {
         if (hubConnection != null)
         {
-            await hubConnection.DisposeAsync();
+            try 
+            {
+                await hubConnection.StopAsync();
+                await hubConnection.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error disposing SignalR connection: {ex.Message}");
+            }
         }
     }
 }
