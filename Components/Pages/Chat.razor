@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.SignalR.Client
 @using NeedSomeHelp.Data
+@implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
@@ -53,6 +55,8 @@
     private string messageInput = "";
     private List<ChatMessage> messages = new();
     private ApplicationUser? ProfileUser;
+    private string? otherUserId;
+    private HubConnection? hubConnection;
 
     private class ChatMessage
     {
@@ -72,6 +76,31 @@
             if (ProfileUser != null)
             {
                 await LoadChatData();
+
+                if (!string.IsNullOrEmpty(otherUserId))
+                {
+                    hubConnection = new HubConnectionBuilder()
+                        .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+                        .WithAutomaticReconnect()
+                        .Build();
+
+                    hubConnection.On<string, string>("ReceiveMessage", (senderId, content) =>
+                    {
+                        if (senderId != ProfileUser.Id)
+                        {
+                            messages.Add(new ChatMessage 
+                            { 
+                                Text = content, 
+                                IsReceived = true, 
+                                Timestamp = DateTime.UtcNow 
+                            });
+                            InvokeAsync(StateHasChanged);
+                        }
+                    });
+
+                    await hubConnection.StartAsync();
+                    await hubConnection.SendAsync("JoinChat", RequestId, ProfileUser.Id, otherUserId);
+                }
             }
         }
         else
@@ -100,7 +129,7 @@
         }
 
         // 2. Identify "Other User" for header display
-        string otherUserId = string.Empty;
+        otherUserId = string.Empty;
 
         if (ProfileUser.Id == request.OwnerId)
         {
@@ -215,8 +244,21 @@
             DbContext.Messages.Add(newMessage);
             await DbContext.SaveChangesAsync();
 
+            if (hubConnection != null)
+            {
+                await hubConnection.SendAsync("SendMessage", RequestId, ProfileUser.Id, receiverId, messageInput);
+            }
+
             messages.Add(new ChatMessage { Text = messageInput, IsReceived = false, Timestamp = newMessage.Timestamp });
             messageInput = "";
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.DisposeAsync();
         }
     }
 }

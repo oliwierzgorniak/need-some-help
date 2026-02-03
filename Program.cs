@@ -1,5 +1,6 @@
 using NeedSomeHelp.Components;
 using NeedSomeHelp.Data;
+using NeedSomeHelp.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Radzen;
@@ -48,5 +49,7 @@ app.MapStaticAssets();
 app.MapRazorPages();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();
