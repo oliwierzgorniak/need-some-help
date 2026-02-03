@@ -9,6 +9,7 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Chat</PageTitle>
 
@@ -95,7 +96,11 @@
                                 IsReceived = true, 
                                 Timestamp = DateTime.UtcNow 
                             });
-                            InvokeAsync(StateHasChanged);
+                            InvokeAsync(async () => 
+                            {
+                                StateHasChanged();
+                                await ScrollToBottom();
+                            });
                         }
                     });
 
@@ -252,6 +257,20 @@
 
             messages.Add(new ChatMessage { Text = messageInput, IsReceived = false, Timestamp = newMessage.Timestamp });
             messageInput = "";
+            await ScrollToBottom();
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await JSRuntime.InvokeVoidAsync("otherInterop.scrollToBottom", ".chat-messages");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ScrollToBottom();
         }
     }
 

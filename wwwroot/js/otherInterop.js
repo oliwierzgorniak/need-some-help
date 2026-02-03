@@ -10,4 +10,12 @@ window.otherInterop = {
       console.error("Failed to copy!", err);
     }
   },
+  scrollToBottom: (selector, isDelayed) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      setTimeout(() => {
+        element.scrollTop = element.scrollHeight;
+      }, 500);
+    }
+  },
 };
