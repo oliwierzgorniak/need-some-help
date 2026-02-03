@@ -1,0 +1,54 @@
+@page "/onboarding/crypto-info"
+@using Radzen
+@using Radzen.Blazor
+@inject NavigationManager NavigationManager
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>How crypto works</PageTitle>
+
+<div class="onboarding">
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="2rem"
+        Class="onboarding__stack">
+
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" TextAlign="TextAlign.Center"
+            Class="onboarding__title">
+            How crypto works
+        </RadzenText>
+
+        <RadzenStack Gap="1.5rem" Class="onboarding__info-container">
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" TextAlign="TextAlign.Center"
+                    class="onboarding__subtitle">
+                    Get a wallet
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">
+                    Install a crypto browser extension on your computer like MetaMask.
+                </RadzenText>
+            </RadzenStack>
+
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" TextAlign="TextAlign.Center"
+                    class="onboarding__subtitle">
+                    Add a gas fee
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">
+                    Add a tiny amount of Solana to your wallet. Each crypto action costs less than a cent.
+                </RadzenText>
+            </RadzenStack>
+
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" TextAlign="TextAlign.Center"
+                    class="onboarding__subtitle">
+                    Help & review
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">
+                    Use your wallet to send tips or leave "Cryptoreviews.", which are more credible. Don’t worry you can
+                    still leave normal reviews without having a wallet
+                </RadzenText>
+            </RadzenStack>
+        </RadzenStack>
+        <a href="/" class="onboarding__info-button">
+            <RadzenButton Text="Go to app" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary" />
+        </a>
+    </RadzenStack>
+</div>

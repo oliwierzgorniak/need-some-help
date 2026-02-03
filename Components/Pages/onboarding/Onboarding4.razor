@@ -19,6 +19,7 @@
 @using Solnet.Programs;
 @using Solnet.Wallet;
 
+
 <!-- Layout matches Figma Node 62:8180 -->
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="1.9rem"
     Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); padding: 1.875rem 0.625rem;">
@@ -37,7 +38,7 @@
 
             <!-- Subhead - Body Medium 14px -->
             <RadzenText
-                Text="Build a trusted history of help and send digital tips. Use your own wallet or let us set it up automatically for you."
+                Text="On Need Some Help, if you wish you can build a trusted history of help and send digital tips using your crypto wallet."
                 TextStyle="TextStyle.Body2" TagName="TagName.P" Style="color: black;" />
         </RadzenStack>
 
@@ -47,42 +48,30 @@
     <RadzenStack Orientation="Orientation.Vertical" Gap="0.8rem" AlignItems="AlignItems.Center"
         Style="width: 7.9375rem;">
         <!-- Connect Wallet Button -->
-        <RadzenButton Text="Connect wallet" ButtonStyle="ButtonStyle.Primary" Click="@ConnectWallet"
-            Style="white-space: nowrap;" />
+        <a href="/">
+            <RadzenButton Text="Explore the app" ButtonStyle="ButtonStyle.Primary" Style="white-space: nowrap;" />
+        </a>
 
         <!-- Skip Button -->
-        <RadzenButton Text="Skip" ButtonStyle="ButtonStyle.Secondary" Click="@Skip" />
+        <a href="./crypto-info">
+            <RadzenButton Text="Explain crypto" ButtonStyle="ButtonStyle.Secondary" class="onboarding__button" />
+        </a>
     </RadzenStack>
 
 </RadzenStack>
 
 @code {
-    async Task ConnectWallet()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var userWalletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        var appUser = await UserManager.GetUserAsync(user);
-
-        if (appUser != null)
+        if (firstRender)
         {
-            appUser.Wallet = userWalletAddress;
-            await UserManager.UpdateAsync(appUser);
+            await CompleteOnboarding();
         }
-
-        await CompleteOnboarding();
-    }
-
-    async Task Skip()
-    {
-        await CompleteOnboarding();
     }
 
     async Task CompleteOnboarding()
     {
         await JSRuntime.InvokeVoidAsync("localStorage.setItem", "hasVisited", "true");
-        NavigationManager.NavigateTo("/");
+        Console.WriteLine("Onboarding completed, redirecting to home page.");
     }
 }
