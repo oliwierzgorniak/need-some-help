@@ -12,3 +12,7 @@
 ::deep .created-info {
   line-height: 1;
 }
+
+::deep .created-info {
+  white-space: nowrap;
+}

@@ -14,3 +14,11 @@
 .menu-list {
   margin-top: 0.5rem;
 }
+
+.logout {
+  margin: 0 auto;
+  text-align: center;
+  margin-top: 2rem;
+  display: block;
+  text-decoration: underline;
+}

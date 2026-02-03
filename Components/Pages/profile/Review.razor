@@ -93,6 +93,7 @@
   }
 
   private string _signature = String.Empty;
+  private string _publicKey = String.Empty;
 
   private async Task OnGiveReviewClick(ReviewFormModel args)
   {
@@ -100,7 +101,11 @@
     {
       try
       {
-        _signature = await JSRuntime.InvokeAsync<string>("solanaInterop.giveReview", args.Rating, args.ReviewText);
+        var result = await JSRuntime.InvokeAsync<Dictionary<string, string>>("solanaInterop.giveReview", args.Rating,
+        args.ReviewText);
+        _signature = result["signature"];
+        _publicKey = result["publicKey"];
+
         Console.WriteLine($"Crypto review submitted with signature: {_signature}");
       }
       catch (Exception ex)
@@ -116,6 +121,12 @@
     var reviewerId = UserManager.GetUserId(user);
     if (!string.IsNullOrEmpty(reviewerId))
     {
+      var currentUser = await DbContext.Users.FindAsync(reviewerId);
+      if (currentUser != null && string.IsNullOrEmpty(currentUser.Wallet) && !string.IsNullOrEmpty(_publicKey))
+      {
+        currentUser.Wallet = _publicKey;
+      }
+
       var review = new NeedSomeHelp.Data.Review
       {
         Rating = args.Rating,

@@ -71,6 +71,8 @@ window.solanaInterop = {
     const provider = window.solana;
     if (!provider) throw new Error("Wallet not found");
 
+    let publicKey;
+
     try {
       if (!provider.isConnected) {
         await provider.connect();
@@ -110,7 +112,7 @@ window.solanaInterop = {
       // 5. Confirm Transaction
       // await connection.confirmTransaction(signature);
 
-      return signature;
+      return { signature: signature, publicKey: provider.publicKey.toString() };
     } catch (err) {
       console.error("Transaction failed", err);
       throw err;
