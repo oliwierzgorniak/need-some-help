@@ -79,6 +79,9 @@
     --material-theme-sys-light-secondary-container
   );
 
+  --rz-badge-primary-background-color: var(--rz-primary);
+  --rz-badge-primary-color: var(--rz-on-primary);
+
   /* MINE */
   --screen-padding: 0.6875rem;
   --arrow-back-font-size: 2.3rem;

@@ -4,6 +4,8 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @using NeedSomeHelp.Data
+@inject NotificationService NotificationService
+@inject IJSRuntime JSRuntime
 
 <div class="container">
   <SecondLevelHeader BackUrl="@BackUrl" Title="@Title" />
@@ -26,24 +28,23 @@
           <RadzenStack Gap="0.8rem">
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
               AlignItems="AlignItems.Center">
-              <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.UserName</RadzenText>
-              <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem">
+              <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" AlignItems="AlignItems.End">
+                <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2">@review.UserName</RadzenText>
                 @if (!string.IsNullOrEmpty(review.BlockchainSignature))
                 {
-                  <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" class="rz-mr-2"
-                    title="@($"Verified on Blockchain\nSig: {review.BlockchainSignature}")">
-                    <RadzenIcon Icon="verified" />
-                    <span>On-Chain</span>
-                  </RadzenBadge>
+                  <div @onclick="@(() => CopyToClipboard(review.BlockchainSignature))" style="cursor: pointer;">
+                    <RadzenBadge IsPill="true" BadgeSize="BadgeSize.Small" BadgeIcon="attach_money"
+                      BadgeStyle="BadgeStyle.Primary">
+                      Crypto
+                    </RadzenBadge>
+                  </div>
                 }
-                <RadzenRating Value="@review.Rating" ReadOnly="true" class="rating" />
               </RadzenStack>
+              <RadzenRating Value="@review.Rating" ReadOnly="true" class="rating" />
             </RadzenStack>
-
             <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
               AlignItems="AlignItems.Start">
               <RadzenText TextStyle="TextStyle.Body2" class="content">@review.Content</RadzenText>
-
               <RadzenText TextStyle="TextStyle.Caption" class="created-info">
                 @review.CreatedAt.ToString("MMM dd, yyyy")
               </RadzenText>
@@ -76,5 +77,24 @@
     public string Content { get; set; } = string.Empty;
     public string? BlockchainSignature { get; set; }
     public DateTime CreatedAt { get; set; }
+  }
+
+  public async Task CopyToClipboard(string text)
+  {
+    try
+    {
+      await JSRuntime.InvokeVoidAsync("otherInterop.copy", text);
+      NotificationService.Notify(new NotificationMessage
+      {
+        Severity = NotificationSeverity.Info,
+        Summary = "Copied to clipboard",
+        Duration = 1500,
+        Style = "position: fixed; top: 0.1rem; right: 1rem;"
+      });
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error copying to clipboard: {ex.Message}");
+    }
   }
 }
