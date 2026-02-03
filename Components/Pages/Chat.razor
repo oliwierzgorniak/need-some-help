@@ -40,7 +40,8 @@
 
     <!-- Input Area -->
     <div class="chat-input-container">
-        <RadzenTextBox @bind-Value="@messageInput" Placeholder="Text" class="message-textbox" />
+        <RadzenTextBox @bind-Value="@messageInput" Placeholder="Text" class="message-textbox" 
+            @onkeydown="@HandleKeyPress" />
         <RadzenButton Icon="send" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Click="@SendMessage"
             class="send-button" />
     </div>
@@ -251,6 +252,14 @@
 
             messages.Add(new ChatMessage { Text = messageInput, IsReceived = false, Timestamp = newMessage.Timestamp });
             messageInput = "";
+        }
+    }
+
+    public async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
         }
     }
 
