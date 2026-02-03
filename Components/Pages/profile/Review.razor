@@ -28,8 +28,13 @@
       </RadzenStack>
     </RadzenStack>
     <RadzenRating Stars="5" @bind-Value="model.Rating" class="rating-control" Name="Rating" />
-    <RadzenTextArea @bind-Value="model.ReviewText" class="review-input" Placeholder="Write your review here..."
-      Name="ReviewText" />
+    <RadzenStack Gap="0" AlignItems="AlignItems.Center" class="review-input-container">
+      <RadzenTextArea Value="@model.ReviewText" ValueChanged="@(args => { model.ReviewText = args; })"
+        class="review-input" Placeholder="Write your review here..." Name="ReviewText" MaxLength="50" Rows="3" />
+      <RadzenText TextStyle="TextStyle.Caption" class="char-count">
+        @(model.ReviewText?.Length ?? 0)/50 max characters
+      </RadzenText>
+    </RadzenStack>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
       <RadzenLabel Text="Crypto review" />
       <RadzenSwitch @bind-Value="model.IsCryptoReview" Style="SwitchStyle.Primary" />

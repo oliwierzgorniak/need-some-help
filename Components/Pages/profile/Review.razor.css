@@ -40,13 +40,22 @@
   margin-bottom: 0.4rem;
 }
 
+::deep .review-input-container {
+  width: 100%;
+  max-width: 15rem;
+  margin-bottom: 1.5rem;
+}
+
 ::deep .review-input {
   width: 100%;
   resize: none;
-  aspect-ratio: 4/2;
   margin: 0.5rem 0;
-  margin-bottom: 1rem;
-  max-width: 20rem;
+}
+
+::deep .char-count {
+  margin-top: -0.2rem;
+  color: var(--rz-text-secondary-color);
+  font-size: 0.75rem;
 }
 
 ::deep .review-button {
