@@ -36,7 +36,7 @@
             <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
                 class="photo-upload-area" Style="@($"background-image: url('{model.PhotoUrl}');")">
                 <label class="upload-label">
-                    <InputFile OnChange="@UploadPhoto" accept="image/*" class="upload-input" />
+                    <InputFile OnChange="@UploadPhoto" accept=".jpg,.jpeg,.png,.webp" class="upload-input" />
                     @if (isUploading)
                     {
                         <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"
@@ -73,7 +73,7 @@
                     {
                         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
                             <RadzenFormField Text="Location" Variant="Variant.Outlined" class="location-field">
-                                <RadzenTextBox @bind-Value="@model.Location" Name="Location" />
+                                <RadzenTextBox @bind-Value="@model.Location" Name="Location" MaxLength="50" />
                             </RadzenFormField>
                             @* !TODO optional map feature *@
                             @* <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"

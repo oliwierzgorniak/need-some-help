@@ -51,9 +51,7 @@
 }
 
 ::deep .cards-grid {
-  /* display: flex;
-  flex-wrap: wrap; */
-  gap: 1rem;
+  gap: 0.4rem;
   margin-bottom: 1rem;
   display: grid;
   grid-template-columns: repeat(
