@@ -21,7 +21,7 @@ public class HelpRequest
     public string? PhotoUrl { get; set; }
 
     [Required]
-    public string OwnerId { get; set; }
+    public string OwnerId { get; set; } = string.Empty;
 
     [ForeignKey(nameof(OwnerId))]
     public ApplicationUser Owner { get; set; } = null!;
