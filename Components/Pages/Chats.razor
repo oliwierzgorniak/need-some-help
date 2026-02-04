@@ -34,7 +34,7 @@
                 {
                     @foreach (var chat in chatItems)
                     {
-                        <a href="@($"chat/{chat.RequestId}")" class="chat-link">
+                        <a href="@($"chat/{chat.RequestId}/{chat.OtherUserId}")" class="chat-link">
                             <RadzenStack Gap="0.2rem" class="text-content">
                                 <RadzenText Text="@chat.OtherUserName" TextStyle="TextStyle.H5" class="user-name" />
                                 <RadzenText Text="@chat.RequestTitle" TextStyle="TextStyle.Body2" class="request-title" />

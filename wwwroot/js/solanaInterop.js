@@ -51,7 +51,7 @@ window.solanaInterop = {
       transaction.add(sendSolInstruction);
 
       // 3. Get latest blockhash (Required for transaction to be valid)
-      const { blockhash } = await connection.getLatestBlockhash();
+      const { blockhash } = await connection.getLatestBlockhash("finalized");
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = provider.publicKey;
 

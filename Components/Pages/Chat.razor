@@ -1,8 +1,9 @@
-@page "/chat/{RequestId:int}"
+@page "/chat/{RequestId:int}/{otherUserId?}"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using NeedSomeHelp.Data
 @implements IAsyncDisposable
 @inject NavigationManager NavigationManager
@@ -23,7 +24,7 @@
             <p class="chat-header-title">@(ContactName ?? "User")</p>
             <p class="chat-header-subtitle">@(RequestTitle ?? "Help request")</p>
         </div>
-        <a href="@($"/profile/{ProfileUser?.Id}")" class="profile-button">
+        <a href="@($"/profile/{otherUserId}")" class="profile-button">
             <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" class="icon-filled" />
         </a>
     </div>
@@ -51,12 +52,14 @@
     [Parameter]
     public int RequestId { get; set; }
 
+    [Parameter]
+    public string? otherUserId { get; set; }
+
     private string ContactName = "Loading...";
     private string RequestTitle = "Loading...";
     private string messageInput = "";
     private List<ChatMessage> messages = new();
-    private ApplicationUser? ProfileUser;
-    private string? otherUserId;
+    private ApplicationUser? currentUser;
     private HubConnection? hubConnection;
 
     private class ChatMessage
@@ -71,30 +74,24 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            ProfileUser = await UserManager.GetUserAsync(user);
-            if (ProfileUser != null)
-            {
-                try
-                {
-                    await LoadChatData();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error loading chat data: {ex.Message}");
-                    // Fallback to empty list or retry logic if needed
-                }
+        if (user.Identity?.IsAuthenticated != true) NavigationManager.NavigateTo("/login", true);
 
-                if (!string.IsNullOrEmpty(otherUserId))
-                {
-                    await StartSignalRConnection();
-                }
-            }
-        }
-        else
+        currentUser = await UserManager.GetUserAsync(user);
+        if (currentUser != null)
         {
-            NavigationManager.NavigateTo("Identity/Account/Login", true);
+            try
+            {
+                await LoadChatData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading chat data: {ex.Message}");
+            }
+
+            if (!string.IsNullOrEmpty(otherUserId))
+            {
+                await StartSignalRConnection();
+            }
         }
     }
 
@@ -109,7 +106,7 @@
 
             hubConnection.On<string, string>("ReceiveMessage", (senderId, content) =>
             {
-                if (ProfileUser != null && senderId != ProfileUser.Id)
+                if (currentUser != null && senderId != currentUser.Id)
                 {
                     messages.Add(new ChatMessage
                     {
@@ -126,60 +123,36 @@
             });
 
             await hubConnection.StartAsync();
-            await hubConnection.SendAsync("JoinChat", RequestId, ProfileUser!.Id, otherUserId!);
+            await hubConnection.SendAsync("JoinChat", RequestId, currentUser!.Id, otherUserId!);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Could not start SignalR connection: {ex.Message}");
-            // We don't throw here, so the page still works in "offline" mode (just DB)
         }
     }
 
     private async Task LoadChatData()
     {
-        if (ProfileUser == null) return;
+        if (currentUser == null) return;
         using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
+        await LoadChatInfo(dbContext);
+        await LoadMessages(dbContext);
+    }
+
+    private async Task LoadChatInfo(ApplicationDbContext dbContext)
+    {
         // 1. Get the Help Request info for context
         var request = await dbContext.HelpRequests
         .Include(r => r.Owner)
         .Include(r => r.ContactedBy)
         .FirstOrDefaultAsync(r => r.Id == RequestId);
 
-        if (request != null)
-        {
-            RequestTitle = request.Title;
-        }
-        else
-        {
-            return;
-        }
+        if (request == null) return;
 
-        // 2. Identify "Other User" for header display
-        otherUserId = string.Empty;
+        RequestTitle = request.Title;
 
-        if (ProfileUser.Id == request.OwnerId)
-        {
-            // First check if there are any existing messages from someone else in this channel
-            var activePartnerId = await dbContext.Messages
-            .Where(m => m.RequestId == RequestId && m.SenderId != ProfileUser.Id)
-            .Select(m => m.SenderId)
-            .FirstOrDefaultAsync();
-
-            if (!string.IsNullOrEmpty(activePartnerId))
-            {
-                otherUserId = activePartnerId;
-            }
-            else if (request.ContactedBy.Any())
-            {
-                otherUserId = request.ContactedBy.First().UserId;
-            }
-        }
-        else
-        {
-            otherUserId = request.OwnerId;
-        }
-
+        // Get details for the header
         if (!string.IsNullOrEmpty(otherUserId))
         {
             var otherUser = await dbContext.Users.FindAsync(otherUserId);
@@ -188,76 +161,39 @@
                 ContactName = otherUser.Name ?? otherUser.UserName ?? "User";
             }
         }
+    }
 
-        // 3. Fetch messages for this REQUEST
+    private async Task LoadMessages(ApplicationDbContext dbContext)
+    {
+        if (string.IsNullOrEmpty(otherUserId) || currentUser == null) return;
+
         var dbMessages = await dbContext.Messages
-        .Where(m => m.RequestId == RequestId)
+        .Where(m => m.RequestId == RequestId &&
+        (
+        (m.SenderId == currentUser.Id && m.ReceiverId == otherUserId) ||
+        (m.SenderId == otherUserId && m.ReceiverId == currentUser.Id)
+        ))
         .OrderBy(m => m.Timestamp)
         .ToListAsync();
 
         messages = dbMessages.Select(m => new ChatMessage
         {
             Text = m.Content,
-            IsReceived = m.SenderId != ProfileUser.Id,
+            IsReceived = m.SenderId != currentUser.Id,
             Timestamp = m.Timestamp
         }).ToList();
     }
 
     private async Task SendMessage()
     {
-        if (!string.IsNullOrWhiteSpace(messageInput) && ProfileUser != null)
+        if (!string.IsNullOrWhiteSpace(messageInput) && currentUser != null && !string.IsNullOrEmpty(otherUserId))
         {
             using var dbContext = await DbContextFactory.CreateDbContextAsync();
-            // Determine receiver based on context
-            // If I am the Owner (CurrentUser.Id == request.OwnerId), then the receiver must be inferred from the context.
-
-            // Re-fetch request to be sure (it's cached in EF usually but safety first)
-            var request = await dbContext.HelpRequests.FindAsync(RequestId);
-            if (request == null) return;
-
-            string receiverId = string.Empty;
-
-            if (ProfileUser.Id == request.OwnerId)
-            {
-                // I am the owner. Who am I talking to?
-                // The instruction implies there IS an "other user".
-                // Query the messages for this RequestId to find someone who isn't me.
-                var lastMessage = await dbContext.Messages
-                .Where(m => m.RequestId == RequestId && m.SenderId != ProfileUser.Id)
-                .OrderByDescending(m => m.Timestamp)
-                .FirstOrDefaultAsync();
-
-                if (lastMessage != null)
-                {
-                    receiverId = lastMessage.SenderId;
-                }
-                else
-                {
-                    // No messages yet? Then we can check the ContactedByUsers list.
-                    // We need to fetch it explicitly
-                    var reqWithContacts = await dbContext.HelpRequests
-                    .Include(r => r.ContactedBy)
-                    .FirstOrDefaultAsync(r => r.Id == RequestId);
-
-                    if (reqWithContacts != null && reqWithContacts.ContactedBy.Any())
-                    {
-                        // Logic: Pick the first or most recent contact?
-                        receiverId = reqWithContacts.ContactedBy.First().UserId;
-                    }
-                }
-            }
-            else
-            {
-                // I am the helper. Receiver is the owner.
-                receiverId = request.OwnerId;
-            }
-
-            if (string.IsNullOrEmpty(receiverId)) return; // Can't send if we don't know who to.
 
             var newMessage = new Message
             {
-                SenderId = ProfileUser.Id,
-                ReceiverId = receiverId,
+                SenderId = currentUser.Id,
+                ReceiverId = otherUserId,
                 RequestId = RequestId,
                 Content = messageInput,
                 Timestamp = DateTime.UtcNow
@@ -266,11 +202,12 @@
             dbContext.Messages.Add(newMessage);
             await dbContext.SaveChangesAsync();
 
+            @* Sending also with websockets *@
             if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
             {
                 try
                 {
-                    await hubConnection.SendAsync("SendMessage", RequestId, ProfileUser.Id, receiverId, messageInput);
+                    await hubConnection.SendAsync("SendMessage", RequestId, currentUser.Id, otherUserId, messageInput);
                 }
                 catch (Exception ex)
                 {
@@ -278,6 +215,7 @@
                 }
             }
 
+            @* Adding to UI *@
             messages.Add(new ChatMessage { Text = messageInput, IsReceived = false, Timestamp = newMessage.Timestamp });
             messageInput = "";
             await ScrollToBottom();

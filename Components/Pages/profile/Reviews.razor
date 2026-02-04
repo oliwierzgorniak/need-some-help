@@ -38,7 +38,6 @@
   private async Task LoadReviews(string userId)
   {
     using var dbContext = await DbContextFactory.CreateDbContextAsync();
-    // 2. Fetch reviews where RevieweeId == UserId
     reviews = await dbContext.Reviews
     .Where(r => r.RevieweeId == userId)
     .Include(r => r.Reviewer)
@@ -64,8 +63,6 @@
     }
 
     await LoadName(UserId);
-
-    // 2. Fetch reviews where RevieweeId == UserId
     await LoadReviews(UserId);
 
     IsLoading = false;

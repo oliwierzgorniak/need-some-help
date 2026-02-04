@@ -176,7 +176,6 @@
                         UserId = userId,
                         User = currentUser,
                         RequestId = request.Id,
-                        Request = request,
                         CreatedAt = DateTime.UtcNow
                     });
                     await dbContext.SaveChangesAsync();

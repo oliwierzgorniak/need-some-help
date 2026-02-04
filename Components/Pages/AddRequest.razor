@@ -76,9 +76,6 @@
                             <RadzenFormField Text="Location" Variant="Variant.Outlined" class="location-field">
                                 <RadzenTextBox @bind-Value="@model.Location" Name="Location" MaxLength="50" />
                             </RadzenFormField>
-                            @* !TODO optional map feature *@
-                            @* <RadzenButton Icon="location_on" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat"
-                                Click="@GetLocation" class="location-button" /> *@
                         </RadzenStack>
                     }
                     <!-- Is help remote? -->
@@ -93,10 +90,6 @@
                         <RadzenMask @bind-Value="@model.PhoneNumber" Name="PhoneNumber" Mask="*** *** ***"
                             CharacterPattern="[0-9]" />
                     </RadzenFormField>
-                    @* <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <RadzenCheckBox @bind-Value="@model.UseMyPhone" Name="UseMyPhone" />
-                        <RadzenLabel Text="I want to use my phone" Component="UseMyPhone" class="checkbox-label" />
-                    </RadzenStack> *@
                 </RadzenStack>
             </RadzenStack>
             <!-- Add Request Button -->
@@ -134,14 +127,12 @@
         public string Description { get; set; } = "";
         public string Location { get; set; } = "";
         public string PhoneNumber { get; set; } = "";
-        public bool UseMyPhone { get; set; }
         public string? PhotoUrl { get; set; }
     }
 
     RequestFormModel model = new RequestFormModel();
     bool isUploading = false;
     string errorMessage = "";
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,27 +171,8 @@
             var blobServiceClient = new BlobServiceClient(Configuration["Azure:Storage:ConnectionString"]);
             var containerClient = blobServiceClient.GetBlobContainerClient("requests");
 
-            bool isPrivate = false;
-            try
-            {
-                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
-            }
-            catch (RequestFailedException ex) when (ex.ErrorCode == "PublicAccessNotPermitted")
-            {
-                // Storage account doesn't support public access. Create private container.
-                isPrivate = true;
-                await containerClient.CreateIfNotExistsAsync();
-            }
-
-            // Double check existing container properties if we didn't catch an exception (in case it already existed as private)
-            if (!isPrivate && await containerClient.ExistsAsync())
-            {
-                var properties = await containerClient.GetPropertiesAsync();
-                if (properties.Value.PublicAccess == PublicAccessType.None)
-                {
-                    isPrivate = true;
-                }
-            }
+            // Ensure container exists with public access
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
             var blobName = $"{Guid.NewGuid()}{extension}";
             var blobClient = containerClient.GetBlobClient(blobName);
@@ -208,24 +180,7 @@
             using var stream = resizedImageFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB max
             await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = format });
 
-            if (isPrivate)
-            {
-                // Generate a SAS token valid for 5 years for simple public access
-                var sasBuilder = new BlobSasBuilder
-                {
-                    BlobContainerName = containerClient.Name,
-                    BlobName = blobName,
-                    Resource = "b",
-                    ExpiresOn = DateTimeOffset.UtcNow.AddYears(5)
-                };
-                sasBuilder.SetPermissions(BlobSasPermissions.Read);
-                var sasUri = blobClient.GenerateSasUri(sasBuilder);
-                model.PhotoUrl = sasUri.ToString();
-            }
-            else
-            {
-                model.PhotoUrl = blobClient.Uri.ToString();
-            }
+            model.PhotoUrl = blobClient.Uri.ToString();
         }
         catch (Exception ex)
         {
@@ -250,41 +205,32 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        Console.WriteLine("Submitting request");
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            var currentUser = await UserManager.GetUserAsync(user);
-            if (currentUser != null)
-            {
-                var newRequest = new HelpRequest
-                {
-                    Title = args.Title,
-                    Description = args.Description,
-                    Location = args.Location,
-                    PhoneNumber = args.UseMyPhone ? currentUser.PhoneNumber : args.PhoneNumber,
-                    OwnerId = currentUser.Id,
-                    PhotoUrl = args.PhotoUrl,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                using var dbContext = await DbContextFactory.CreateDbContextAsync();
-                dbContext.HelpRequests.Add(newRequest);
-                await dbContext.SaveChangesAsync();
-
-                NavigationManager.NavigateTo("/");
-            }
-        }
-        else
+        if (user.Identity?.IsAuthenticated == false)
         {
             NavigationManager.NavigateTo("/Login", true);
+            return;
         }
-    }
 
-    void GetLocation()
-    {
-        // TODO: Implement geolocation fetch
-        model.Location = "Current Location"; // Placeholder
+        var currentUser = await UserManager.GetUserAsync(user);
+        if (currentUser != null)
+        {
+            var newRequest = new HelpRequest
+            {
+                Title = args.Title,
+                Description = args.Description,
+                Location = args.Location,
+                PhoneNumber = args.PhoneNumber,
+                OwnerId = currentUser.Id,
+                PhotoUrl = args.PhotoUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            using var dbContext = await DbContextFactory.CreateDbContextAsync();
+            dbContext.HelpRequests.Add(newRequest);
+            await dbContext.SaveChangesAsync();
+
+            NavigationManager.NavigateTo("/");
+        }
     }
 
     async Task<bool> IsContentSafe(string title, string description, string? photoUrl)

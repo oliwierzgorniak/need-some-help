@@ -22,7 +22,7 @@
     }
     else
     {
-      <div class="wallet-info" style="text-align: center; ">
+      <div class="wallet-info">
         <div>Connected: @ShortenAddress(userWalletAddress)</div>
         <div class="wallet-info__amount">Balance: @userBalance.ToString("F4") SOL</div>
       </div>
@@ -54,8 +54,6 @@
   public string UserId { get; set; } = string.Empty;
 
   private decimal TipAmount { get; set; } = 0.010m;
-  private string Message { get; set; } = string.Empty;
-  private bool isSending = false;
 
   // Wallet State
   private string userWalletAddress = "";
@@ -89,13 +87,10 @@
     try
     {
       statusMessage = "";
-      // 1. Call JS to connect to Brave/Phantom
       userWalletAddress = await JSRuntime.InvokeAsync<string>("solanaInterop.connect");
 
       if (!string.IsNullOrEmpty(userWalletAddress))
       {
-        // 2. Access Localnet RPC to get balance
-        // Use the Surfpool URL (Default standard is 127.0.0.1:8899)
         var rpcClient = ClientFactory.GetClient("https://api.devnet.solana.com");
         var balanceResult = await rpcClient.GetBalanceAsync(userWalletAddress);
 
@@ -106,7 +101,7 @@
         }
         else
         {
-          statusMessage = "Could not fetch balance from Localnet. Is Surfpool running?";
+          statusMessage = "Could not fetch balance from Network. Is network running?";
         }
       }
     }
@@ -127,8 +122,6 @@
   {
     if (string.IsNullOrEmpty(userWalletAddress)) return;
 
-    isSending = true;
-
     try
     {
       using var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -137,11 +130,9 @@
       if (otherUser == null || string.IsNullOrEmpty(otherUser.Wallet))
       {
         statusMessage = "User that you're sending to has not connected a wallet yet.";
-        isSending = false;
         return;
       }
 
-      // 2. Call JS to build, sign, and send the transaction purely on the client
       var signature = await JSRuntime.InvokeAsync<string>(
       "solanaInterop.sendTip",
       otherUser.Wallet,
@@ -150,19 +141,13 @@
 
       if (!string.IsNullOrEmpty(signature))
       {
-        Message = "Tip Sent!";
         statusMessage = "";
-        // Optional: Log transaction to your DB here if needed
       }
     }
     catch (Exception ex)
     {
       statusMessage = $"Transaction failed: {ex.Message}";
       Console.WriteLine(ex);
-    }
-    finally
-    {
-      isSending = false;
     }
   }
 }
