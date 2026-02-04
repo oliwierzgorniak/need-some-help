@@ -3,7 +3,7 @@
 @using NeedSomeHelp.Data
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @rendermode RenderMode.InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -70,9 +70,9 @@ else
                         PhotoUrl="@request.PhotoUrl" />
                 }
             </div>
-            
-            <RadzenPager Count="@requests.Count" PageSize="@pageSize" PageChanged="@OnPageChanged" 
-                        Density="Density.Compact" HorizontalAlign="HorizontalAlign.Center" />
+
+            <RadzenPager Count="@requests.Count" PageSize="@pageSize" PageChanged="@OnPageChanged" Density="Density.Compact"
+                HorizontalAlign="HorizontalAlign.Center" />
         }
         <Nav />
     </div>
@@ -80,7 +80,7 @@ else
 
 @code {
     private bool isChecking = true;
-    
+
     // Pagination state
     private int pageSize = 10;
     private int skip = 0;
@@ -109,7 +109,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Fetch HelpRequests from the database
-        var dbRequests = await DbContext.HelpRequests
+        using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var dbRequests = await dbContext.HelpRequests
         .OrderByDescending(r => r.CreatedAt)
         .ToListAsync();
 

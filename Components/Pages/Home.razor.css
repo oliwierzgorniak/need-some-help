@@ -21,35 +21,6 @@
   overflow: hidden;
 }
 
-::deep .action-button {
-  letter-spacing: 0.031rem;
-  font-weight: 500;
-}
-
-.search-container {
-  position: relative;
-  width: 100%;
-}
-
-::deep .search-input {
-  margin: 0;
-  width: 100%;
-}
-
-::deep .search-icon {
-  position: absolute;
-  right: 1px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--material-theme-sys-light-background);
-  padding: 0 1rem;
-}
-
-::deep .cards-container {
-  margin-top: 1.5rem;
-  margin-bottom: 3rem;
-}
-
 ::deep .cards-grid {
   gap: 0.4rem;
   margin-bottom: 1rem;

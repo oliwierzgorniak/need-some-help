@@ -5,7 +5,7 @@
   margin: 0 auto;
 }
 
-.back-button ::deep i {
+.arrow-back ::deep i {
   font-size: var(--arrow-back-font-size);
 }
 

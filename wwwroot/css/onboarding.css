@@ -29,10 +29,6 @@
   align-items: center;
 }
 
-.onboarding__content--align-end {
-  align-items: flex-end;
-}
-
 .onboarding__image {
   width: 100%;
   height: auto;

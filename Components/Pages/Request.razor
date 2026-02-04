@@ -1,7 +1,6 @@
 @page "/request/{Id}"
 @inject NavigationManager NavigationManager
 @using Humanizer
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using Radzen
 @using Radzen.Blazor
 @using Microsoft.AspNetCore.Authorization
@@ -11,7 +10,7 @@
 @using NeedSomeHelp.Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JSRuntime
 
 <PageTitle>Request Details</PageTitle>
@@ -111,17 +110,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         if (int.TryParse(Id, out int requestId))
         {
-            request = await DbContext.HelpRequests
+            using var dbContext = await DbContextFactory.CreateDbContextAsync();
+            request = await dbContext.HelpRequests
             .Include(r => r.Owner)
             .FirstOrDefaultAsync(r => r.Id == requestId);
 
             if (request != null)
             {
                 owner = request.Owner;
-                await HandleReviews(owner);
+                await HandleReviews(owner, dbContext);
             }
         }
 
@@ -161,8 +160,9 @@
         if (request != null)
         {
             var userId = UserManager.GetUserId(user);
+            using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-            var currentUser = await DbContext.Users
+            var currentUser = await dbContext.Users
             .Include(u => u.ContactedRequests)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -179,7 +179,7 @@
                         Request = request,
                         CreatedAt = DateTime.UtcNow
                     });
-                    await DbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
                     Console.WriteLine("Added to contacted requests.");
                 }
             }
@@ -197,9 +197,9 @@
     public int ReviewCount = 0;
     public double ReviewRating = 0.0;
 
-    private async Task HandleReviews(ApplicationUser owner)
+    private async Task HandleReviews(ApplicationUser owner, ApplicationDbContext dbContext)
     {
-        var reviews = await DbContext.Reviews
+        var reviews = await dbContext.Reviews
         .Where(r => r.RevieweeId == owner.Id)
         .ToListAsync();
 

@@ -1,7 +1,6 @@
 @page "/my-profile/wallet"
 @using NeedSomeHelp.Data
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
 @inject IJSRuntime JSRuntime
 
 @using Microsoft.AspNetCore.Components
@@ -10,10 +9,9 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @attribute [Authorize]
-@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 @using Solnet.Rpc;
 @using Solnet.Programs;

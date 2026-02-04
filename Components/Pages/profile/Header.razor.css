@@ -3,13 +3,6 @@
   text-align: center;
 }
 
-::deep .avatar-image {
-  width: 4.75rem;
-  object-fit: cover;
-  height: 4.75rem;
-  border-radius: 50%;
-}
-
 ::deep .user-name {
   font-weight: 600;
   margin: 0;
@@ -31,7 +24,7 @@
 }
 
 .divider {
-  border-top: 1px solid #d8d8d8; /* Assuming based on svg */
+  border-top: 1px solid #d8d8d8;
   width: 100%;
   height: 1px;
 }

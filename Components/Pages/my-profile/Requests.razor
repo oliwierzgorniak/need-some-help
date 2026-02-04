@@ -2,7 +2,6 @@
 @using Microsoft.EntityFrameworkCore
 @using NeedSomeHelp.Data
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Authorization
 @using System.Security.Claims
@@ -12,10 +11,9 @@
 @using NeedSomeHelp.Components.Layout
 
 @attribute [Authorize]
-@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <PageTitle>My requests</PageTitle>
 
@@ -69,26 +67,24 @@ else
     if (user.Identity?.IsAuthenticated == false)
       return;
 
+    var userId = UserManager.GetUserId(user);
+    if (string.IsNullOrEmpty(userId)) return;
+
+    // Fetch HelpRequests from the database
+    using var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var dbRequests = await dbContext.HelpRequests
+    .Where(r => r.OwnerId == userId)
+    .OrderByDescending(r => r.CreatedAt)
+    .ToListAsync();
+
+    requests = dbRequests.Select(r => new RequestItem
     {
-      var userId = UserManager.GetUserId(user);
-      if (string.IsNullOrEmpty(userId)) return;
+      Id = r.Id,
+      Title = r.Title,
+      Location = r.Location,
+      PhotoUrl = r.PhotoUrl
+    }).ToList();
 
-
-      // Fetch HelpRequests from the database
-      var dbRequests = await DbContext.HelpRequests
-      .Where(r => r.OwnerId == userId)
-      .OrderByDescending(r => r.CreatedAt)
-      .ToListAsync();
-
-      requests = dbRequests.Select(r => new RequestItem
-      {
-        Id = r.Id,
-        Title = r.Title,
-        Location = r.Location,
-        PhotoUrl = r.PhotoUrl
-      }).ToList();
-
-      isLoading = false;
-    }
+    isLoading = false;
   }
 }

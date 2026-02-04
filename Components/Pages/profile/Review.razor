@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @using Radzen
@@ -71,9 +71,11 @@
     var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
     var user = authState.User;
 
+    using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
     if (!string.IsNullOrEmpty(UserId))
     {
-      var otherUser = await DbContext.Users.FindAsync(UserId);
+      var otherUser = await dbContext.Users.FindAsync(UserId);
       if (otherUser != null)
         userName = otherUser.Name ?? otherUser.UserName ?? "User";
     }
@@ -83,10 +85,10 @@
       var loggedInUserId = UserManager.GetUserId(user);
       if (!string.IsNullOrEmpty(loggedInUserId))
       {
-        helpRequests = await DbContext.HelpRequests
+        helpRequests = await dbContext.HelpRequests
         .Where(hr => hr.OwnerId == loggedInUserId
         && hr.ContactedBy.Any(c => c.UserId == UserId)
-        && !DbContext.Reviews.Any(r => r.HelpRequestId == hr.Id && r.ReviewerId == loggedInUserId && r.RevieweeId == UserId))
+        && !dbContext.Reviews.Any(r => r.HelpRequestId == hr.Id && r.ReviewerId == loggedInUserId && r.RevieweeId == UserId))
         .ToListAsync();
       }
     }
@@ -121,7 +123,8 @@
     var reviewerId = UserManager.GetUserId(user);
     if (!string.IsNullOrEmpty(reviewerId))
     {
-      var currentUser = await DbContext.Users.FindAsync(reviewerId);
+      using var dbContext = await DbContextFactory.CreateDbContextAsync();
+      var currentUser = await dbContext.Users.FindAsync(reviewerId);
       if (currentUser != null && string.IsNullOrEmpty(currentUser.Wallet) && !string.IsNullOrEmpty(_publicKey))
       {
         currentUser.Wallet = _publicKey;
@@ -138,8 +141,8 @@
         BlockchainReference = _signature
       };
 
-      DbContext.Reviews.Add(review);
-      await DbContext.SaveChangesAsync();
+      dbContext.Reviews.Add(review);
+      await dbContext.SaveChangesAsync();
     }
 
     NavigationManager.NavigateTo($"/profile/{UserId}");

@@ -1,7 +1,8 @@
 @page "/profile/{UserId}/tip"
 @using NeedSomeHelp.Data
+@using Microsoft.EntityFrameworkCore
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject IJSRuntime JSRuntime
 
 @using Solnet.Rpc;
@@ -71,7 +72,8 @@
   {
     if (!string.IsNullOrEmpty(UserId))
     {
-      var otherUser = await DbContext.Users.FindAsync(UserId);
+      using var dbContext = await DbContextFactory.CreateDbContextAsync();
+      var otherUser = await dbContext.Users.FindAsync(UserId);
       if (otherUser != null)
         userName = otherUser.Name ?? otherUser.UserName ?? "User";
     }
@@ -129,8 +131,9 @@
 
     try
     {
+      using var dbContext = await DbContextFactory.CreateDbContextAsync();
       // 1. Get Recipient Wallet from DB
-      var otherUser = await DbContext.Users.FindAsync(UserId);
+      var otherUser = await dbContext.Users.FindAsync(UserId);
       if (otherUser == null || string.IsNullOrEmpty(otherUser.Wallet))
       {
         statusMessage = "User that you're sending to has not connected a wallet yet.";

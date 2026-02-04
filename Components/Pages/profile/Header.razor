@@ -3,7 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 <div>
   <RadzenStack Gap="0.9rem" class="header-section">
@@ -29,9 +29,11 @@
 
   protected override async Task OnInitializedAsync()
   {
+    using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
     if (!string.IsNullOrEmpty(UserId))
     {
-      User = await UserManager.FindByIdAsync(UserId);
+      User = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == UserId);
     }
     else
     {
@@ -40,16 +42,20 @@
 
       if (userPrincipal.Identity is not null && userPrincipal.Identity.IsAuthenticated)
       {
-        User = await UserManager.GetUserAsync(userPrincipal);
+        var currentUserId = UserManager.GetUserId(userPrincipal);
+        if (currentUserId != null)
+        {
+          User = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+        }
       }
     }
 
-    await HandleReviews();
+    await HandleReviews(dbContext);
   }
 
-  private async Task HandleReviews()
+  private async Task HandleReviews(ApplicationDbContext dbContext)
   {
-    var reviews = await DbContext.Reviews
+    var reviews = await dbContext.Reviews
     .Where(r => r.RevieweeId == UserId)
     .ToListAsync();
 

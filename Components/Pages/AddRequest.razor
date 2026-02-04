@@ -10,8 +10,9 @@
 @using Azure
 @using Azure.AI.ContentSafety
 @using System.IO
+@using Microsoft.EntityFrameworkCore
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IConfiguration Configuration
@@ -267,8 +268,9 @@
                     CreatedAt = DateTime.UtcNow
                 };
 
-                DbContext.HelpRequests.Add(newRequest);
-                await DbContext.SaveChangesAsync();
+                using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                dbContext.HelpRequests.Add(newRequest);
+                await dbContext.SaveChangesAsync();
 
                 NavigationManager.NavigateTo("/");
             }

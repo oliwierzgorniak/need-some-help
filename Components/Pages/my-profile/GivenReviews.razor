@@ -9,9 +9,9 @@
 @attribute [Authorize]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
-<PageTitle>@($"Given reviews")</PageTitle>
+<PageTitle>Given reviews</PageTitle>
 
 <ReviewsTemplate BackUrl="/my-profile" Title="Given Reviews" IsLoading="@IsLoading" reviews="@reviews" />
 
@@ -27,8 +27,9 @@
 
   private async Task LoadReviews(string userId)
   {
+    using var dbContext = await DbContextFactory.CreateDbContextAsync();
     // 2. Fetch reviews where ReviewerId == UserId
-    reviews = await DbContext.Reviews
+    reviews = await dbContext.Reviews
     .Where(r => r.ReviewerId == userId)
     .Include(r => r.Reviewee)
     .OrderByDescending(r => r.CreatedAt)
@@ -48,10 +49,6 @@
   {
     var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
     var user = authState.User;
-
-    @* var UserProfile = await UserManager.GetUserAsync(user); *@
-    @* UserName = UserProfile?.Name ?? UserProfile?.UserName ?? "User"; *@
-
     var UserId = UserManager.GetUserId(user);
 
     if (string.IsNullOrEmpty(UserId))

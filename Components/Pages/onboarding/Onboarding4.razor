@@ -1,11 +1,9 @@
 @page "/onboarding/4"
-@using Microsoft.EntityFrameworkCore
 @using Radzen
 @using Radzen.Blazor
 @rendermode RenderMode.InteractiveServer
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
@@ -13,7 +11,6 @@
 @using NeedSomeHelp.Data
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
-@inject ApplicationDbContext DbContext
 
 @using Solnet.Rpc;
 @using Solnet.Programs;
@@ -57,6 +54,5 @@
     async Task CompleteOnboarding()
     {
         await JSRuntime.InvokeVoidAsync("localStorage.setItem", "hasVisited", "true");
-        Console.WriteLine("Onboarding completed, redirecting to home page.");
     }
 }

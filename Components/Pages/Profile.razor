@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using NeedSomeHelp.Data
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @using Radzen
 @using Radzen.Blazor
 @using NeedSomeHelp.Components.Pages.profile
@@ -36,7 +36,8 @@
   {
     if (!string.IsNullOrEmpty(UserId))
     {
-      var user = await DbContext.Users.FindAsync(UserId);
+      using var dbContext = await DbContextFactory.CreateDbContextAsync();
+      var user = await dbContext.Users.FindAsync(UserId);
       if (user != null && !string.IsNullOrEmpty(user.Wallet))
       {
         _hasWallet = true;

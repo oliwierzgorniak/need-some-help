@@ -91,10 +91,6 @@
   flex: 1;
 }
 
-::deep .location-button {
-  margin-top: 0.45rem;
-}
-
 ::deep .checkbox-label {
   color: var(--material-theme-sys-light-on-surface-variant);
 }

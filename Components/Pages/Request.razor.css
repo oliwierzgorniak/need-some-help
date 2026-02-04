@@ -32,24 +32,8 @@
   width: 100%;
 }
 
-::deep .avatar {
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 50%;
-}
-
 .user-info-flex {
   flex: 1;
-}
-
-::deep .report-text {
-  color: var(--material-theme-sys-light-error);
-  cursor: pointer;
-}
-
-::deep .report-icon {
-  color: var(--material-theme-sys-light-error);
-  font-size: 1rem;
 }
 
 ::deep .star-icon {
@@ -63,10 +47,6 @@
 ::deep .reviews-text {
   color: var(--material-theme-sys-light-secondary);
   line-height: 1;
-}
-
-::deep .login-text {
-  color: var(--material-theme-sys-light-secondary);
 }
 
 ::deep .location-title {
