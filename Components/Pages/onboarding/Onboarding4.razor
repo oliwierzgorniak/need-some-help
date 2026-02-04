@@ -20,44 +20,29 @@
 @using Solnet.Wallet;
 
 
-<!-- Layout matches Figma Node 62:8180 -->
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="1.9rem"
-    Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); padding: 1.875rem 0.625rem;">
-
-    <!-- Image + Text Group: Node 112:347 -->
-    <RadzenStack Gap="0.75rem" AlignItems="AlignItems.End" Style="width: 18.4375rem; max-width: 100%;">
-
-        <!-- Image: Node 101:305 -->
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.7rem"
+    Class="onboarding__container onboarding__container--alt">
+    <RadzenStack Gap="0.75rem" AlignItems="AlignItems.End" Class="onboarding__content">
         <RadzenImage Path="assets/onboarding/4.png" Height="1000" Width="1156"
-            Style="width: 100%; height: auto; object-fit: contain;" AlternateText="Crypto features" />
-
-        <!-- Text Group: Node 112:346 -->
-        <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center" Style="width: 100%; text-align: center;">
-            <!-- Headline - Headline Medium 28px -->
-            <RadzenText Text="Crypto features" TextStyle="TextStyle.H5" TagName="TagName.H2" Style="color: black;" />
-
-            <!-- Subhead - Body Medium 14px -->
+            Class="onboarding__image onboarding__image--large" AlternateText="Crypto features" />
+        <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center"
+            Class="onboarding__text-group onboarding__text-group--no-margin">
+            <RadzenText Text="Crypto features" TextStyle="TextStyle.H5" TagName="TagName.H2"
+                Class="onboarding__headline" />
             <RadzenText
                 Text="On Need Some Help, if you wish you can build a trusted history of help and send digital tips using your crypto wallet."
-                TextStyle="TextStyle.Body2" TagName="TagName.P" Style="color: black;" />
+                TextStyle="TextStyle.Body2" TagName="TagName.P" Class="onboarding__subhead" />
         </RadzenStack>
-
     </RadzenStack>
-
-    <!-- Buttons Group: Node 112:355 -->
     <RadzenStack Orientation="Orientation.Vertical" Gap="0.8rem" AlignItems="AlignItems.Center"
-        Style="width: 7.9375rem;">
-        <!-- Connect Wallet Button -->
+        Class="onboarding__buttons">
         <a href="/">
             <RadzenButton Text="Explore the app" ButtonStyle="ButtonStyle.Primary" Style="white-space: nowrap;" />
         </a>
-
-        <!-- Skip Button -->
-        <a href="./crypto-info">
+        <a href="/onboarding/crypto-info">
             <RadzenButton Text="Explain crypto" ButtonStyle="ButtonStyle.Secondary" class="onboarding__button" />
         </a>
     </RadzenStack>
-
 </RadzenStack>
 
 @code {

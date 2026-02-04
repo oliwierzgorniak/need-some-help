@@ -1,19 +1,12 @@
 @using Microsoft.AspNetCore.Components
 @inject NavigationManager NavigationManager
 
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Style="width: 100%; margin-top: 1rem; gap: 48px;">
-    <!-- Back Button -->
-    <RadzenButton Text="Back" 
-                  Click="@(args => NavigationManager.NavigateTo(BackUrl))"
-                  ButtonStyle="ButtonStyle.Secondary" />
-    
-    <!-- Progress Bar -->
-    <RadzenProgressBar Value="@Progress" ShowValue="false" />
-
-    <!-- Next Button -->
-    <RadzenButton Text="Next" 
-                  ButtonStyle="ButtonStyle.Primary"
-                  Click="@(args => NavigationManager.NavigateTo(NextUrl))" />
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+    AlignItems="AlignItems.Center" Class="onboarding__navigation" Style="gap: 48px;">
+    <RadzenButton Text="Back" Click="@(args => NavigationManager.NavigateTo(BackUrl))"
+        ButtonStyle="ButtonStyle.Secondary" />
+    <RadzenButton Text="Next" ButtonStyle="ButtonStyle.Primary"
+        Click="@(args => NavigationManager.NavigateTo(NextUrl))" />
 </RadzenStack>
 
 @code {

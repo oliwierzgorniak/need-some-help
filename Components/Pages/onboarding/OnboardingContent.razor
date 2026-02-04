@@ -1,32 +1,13 @@
-<!-- Layout matches Figma Node 58:6832 / 58:7868 -->
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" 
-             Style="min-height: 100vh; background-color: var(--material-theme-sys-light-background); padding: 1.625rem 2.5rem;">
-
-    <!-- Relative Container -->
-    <RadzenStack Gap="1.4375rem" AlignItems="AlignItems.Center" Style="width: 100%; max-width: 239px;"> 
-        
-        <!-- Image -->
-        <RadzenImage Path="@ImagePath" Width="1156" Height="1000" Style="max-width: 100%; height: auto; object-fit: contain;" AlternateText="@ImageAltText" />
-
-        <!-- Text Group -->
-        <RadzenStack Gap="0.375rem" AlignItems="AlignItems.Center" Style="width: 100%; text-align: center; margin-top: 1rem;">
-             <!-- Headline -->
-            <RadzenText Text="@Headline" 
-                        TextStyle="TextStyle.H4"
-                        TagName="TagName.H2"
-                        Style="color: black;" />
-            
-             <!-- Subhead -->
-            <RadzenText Text="@Subhead" 
-                        TextStyle="TextStyle.Body1"
-                        TagName="TagName.P"
-                        Style="color: black;" />
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Class="onboarding__container">
+    <RadzenStack Gap="1.4375rem" AlignItems="AlignItems.Center" Class="onboarding__content">
+        <RadzenImage Path="@ImagePath" Width="1156" Height="1000" Class="onboarding__image"
+            AlternateText="@ImageAltText" />
+        <RadzenStack Gap="0.375rem" AlignItems="AlignItems.Center" Class="onboarding__text-group">
+            <RadzenText Text="@Headline" TextStyle="TextStyle.H4" TagName="TagName.H2" Class="onboarding__headline" />
+            <RadzenText Text="@Subhead" TextStyle="TextStyle.Body1" TagName="TagName.P" Class="onboarding__subhead" />
         </RadzenStack>
-
-            <OnboardingNavigation Progress="@Progress" BackUrl="@BackUrl" NextUrl="@NextUrl" />
-
+        <OnboardingNavigation Progress="@Progress" BackUrl="@BackUrl" NextUrl="@NextUrl" />
     </RadzenStack>
-
 </RadzenStack>
 
 @code {
