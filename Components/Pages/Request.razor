@@ -126,7 +126,7 @@
 
         await UpdateIsOwnRequest();
     }
-    private Boolean _isOwnRequest = false;
+    private bool _isOwnRequest = false;
 
     private bool _isAuthenticated = false;
 
@@ -166,7 +166,7 @@
             .Include(u => u.ContactedRequests)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (currentUser != null)
+            if (currentUser != null && userId != null)
             {
                 // Check if already contacted
                 if (!currentUser.ContactedRequests.Any(r => r.RequestId == request.Id))
@@ -179,7 +179,6 @@
                         CreatedAt = DateTime.UtcNow
                     });
                     await dbContext.SaveChangesAsync();
-                    Console.WriteLine("Added to contacted requests.");
                 }
             }
         }
@@ -187,12 +186,8 @@
         return true;
     }
 
-    async Task OnMessageClick()
-    {
-        await AddToChats();
-        NavigationManager.NavigateTo("/chats");
-    }
 
+    @* Reviews *@
     public int ReviewCount = 0;
     public double ReviewRating = 0.0;
 
@@ -209,6 +204,13 @@
         }
     }
 
+
+    @* Handling buttons *@
+    async Task OnMessageClick()
+    {
+        await AddToChats();
+        NavigationManager.NavigateTo("/chats");
+    }
     private async Task OnPhoneClick()
     {
         @* Doesn't continue if add to chats fails *@
@@ -219,10 +221,10 @@
             await JSRuntime.InvokeVoidAsync("communicationInterop.call", request.PhoneNumber);
         }
     }
-
     private Task OnShareClick()
     {
         JSRuntime.InvokeVoidAsync("communicationInterop.share");
         return Task.CompletedTask;
     }
+
 }

@@ -52,7 +52,6 @@
     if (user.Identity is { IsAuthenticated: true })
     {
       loggedInUserId = UserManager.GetUserId(user) ?? string.Empty;
-      Console.WriteLine($"Logged in user ID: {loggedInUserId}");
     }
   }
 }
