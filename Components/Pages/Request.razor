@@ -111,7 +111,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await UpdateIsOwnRequest();
 
         if (int.TryParse(Id, out int requestId))
         {
@@ -126,6 +125,7 @@
             }
         }
 
+        await UpdateIsOwnRequest();
     }
     private Boolean _isOwnRequest = false;
 
@@ -163,15 +163,22 @@
             var userId = UserManager.GetUserId(user);
 
             var currentUser = await DbContext.Users
-            .Include(u => u.ContactedHelpRequests)
+            .Include(u => u.ContactedRequests)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (currentUser != null)
             {
                 // Check if already contacted
-                if (!currentUser.ContactedHelpRequests.Any(r => r.Id == request.Id))
+                if (!currentUser.ContactedRequests.Any(r => r.RequestId == request.Id))
                 {
-                    currentUser.ContactedHelpRequests.Add(request);
+                    currentUser.ContactedRequests.Add(new ContactedHelpRequest
+                    {
+                        UserId = userId,
+                        User = currentUser,
+                        RequestId = request.Id,
+                        Request = request,
+                        CreatedAt = DateTime.UtcNow
+                    });
                     await DbContext.SaveChangesAsync();
                     Console.WriteLine("Added to contacted requests.");
                 }

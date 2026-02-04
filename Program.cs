@@ -10,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddSignalR().AddAzureSignalR();
+builder.Services.AddSignalR().AddAzureSignalR(options =>
+{
+    options.ConnectionCount = 2;
+});
 builder.Services.AddRadzenComponents();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

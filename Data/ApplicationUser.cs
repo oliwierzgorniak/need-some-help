@@ -10,7 +10,7 @@ public class ApplicationUser : IdentityUser
 
     public string? Wallet { get; set; }
     
-    public virtual ICollection<HelpRequest> ContactedHelpRequests { get; set; } = new List<HelpRequest>();
+    public virtual ICollection<ContactedHelpRequest> ContactedRequests { get; set; } = new List<ContactedHelpRequest>();
 
     [InverseProperty(nameof(Review.Reviewee))]
     public virtual ICollection<Review> ReceivedReviews { get; set; } = new List<Review>();

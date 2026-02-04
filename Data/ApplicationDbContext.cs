@@ -8,6 +8,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Message> Messages { get; set; }
     public DbSet<HelpRequest> HelpRequests { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<ContactedHelpRequest> ContactedUserRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -44,18 +45,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(r => r.OwnerId)
             .OnDelete(DeleteBehavior.Cascade); // Keeping this cascade is fine if it doesn't conflict
 
-        // Configure Many-to-Many relationship with NO ACTION deletion to avoid cycles
-        builder.Entity<ApplicationUser>()
-            .HasMany(u => u.ContactedHelpRequests)
-            .WithMany(r => r.ContactedByUsers)
-            .UsingEntity<Dictionary<string, object>>(
-                "ContactedHelpRequests",
-                j => j.HasOne<HelpRequest>().WithMany().HasForeignKey("ContactedHelpRequestsId").OnDelete(DeleteBehavior.Restrict), // Prevent cascading delete from Request
-                j => j.HasOne<ApplicationUser>().WithMany().HasForeignKey("ContactedByUsersId").OnDelete(DeleteBehavior.Restrict),   // Prevent cascading delete from User
-                j => 
-                {
-                    j.HasKey("ContactedHelpRequestsId", "ContactedByUsersId");
-                }
-            );
+        // Configure Explicit Many-to-Many relationship via ContactedHelpRequest
+        builder.Entity<ContactedHelpRequest>()
+            .HasKey(cr => new { cr.UserId, cr.RequestId });
+
+        builder.Entity<ContactedHelpRequest>()
+            .HasOne(cr => cr.User)
+            .WithMany(u => u.ContactedRequests)
+            .HasForeignKey(cr => cr.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<ContactedHelpRequest>()
+            .HasOne(cr => cr.Request)
+            .WithMany(r => r.ContactedBy)
+            .HasForeignKey(cr => cr.RequestId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -26,7 +26,7 @@ public class HelpRequest
     [ForeignKey(nameof(OwnerId))]
     public ApplicationUser Owner { get; set; } = null!;
 
-    public virtual ICollection<ApplicationUser> ContactedByUsers { get; set; } = new List<ApplicationUser>();
+    public virtual ICollection<ContactedHelpRequest> ContactedBy { get; set; } = new List<ContactedHelpRequest>();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

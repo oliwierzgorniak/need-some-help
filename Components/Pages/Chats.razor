@@ -66,6 +66,7 @@
         public string OtherUserName { get; set; } = "Unknown";
         public string RequestTitle { get; set; } = string.Empty;
         public int RequestId { get; set; }
+        public DateTime LastActive { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
@@ -79,35 +80,58 @@
             if (!string.IsNullOrEmpty(userId))
             {
                 // 1. Get requests I contacted (I am the helper, User is the Owner)
-                // We need to fetch the User (me) and Include ContactedHelpRequests -> ThenInclude Owner
+                // Show regardless of message existence. Sort by LastMessage ?? ContactedAt
                 var myContactedData = await DbContext.Users
                 .Where(u => u.Id == userId)
-                .Include(u => u.ContactedHelpRequests)
-                .ThenInclude(r => r.Owner)
-                .SelectMany(u => u.ContactedHelpRequests)
-                .Select(r => new ChatItem
+                .SelectMany(u => u.ContactedRequests)
+                .Select(cr => new ChatItem
                 {
-                    OtherUserId = r.OwnerId,
-                    OtherUserName = r.Owner.Name ?? r.Owner.UserName ?? "User",
-                    RequestTitle = r.Title,
-                    RequestId = r.Id
+                    OtherUserId = cr.Request.OwnerId,
+                    OtherUserName = cr.Request.Owner.Name ?? cr.Request.Owner.UserName ?? "User",
+                    RequestTitle = cr.Request.Title,
+                    RequestId = cr.RequestId,
+                    LastActive = DbContext.Messages
+                        .Where(m => m.RequestId == cr.RequestId && (
+                            (m.SenderId == userId && m.ReceiverId == cr.Request.OwnerId) || 
+                            (m.SenderId == cr.Request.OwnerId && m.ReceiverId == userId)
+                        ))
+                        .OrderByDescending(m => m.Timestamp)
+                        .Select(m => (DateTime?)m.Timestamp)
+                        .FirstOrDefault() ?? cr.CreatedAt
                 })
                 .ToListAsync();
 
                 // 2. Get requests I own that have been contacted (I am the owner, User is the helper)
-                var requestsIOwnData = await DbContext.HelpRequests
-                .Where(r => r.OwnerId == userId)
-                .Include(r => r.ContactedByUsers)
-                .SelectMany(r => r.ContactedByUsers.Select(u => new ChatItem
-                {
-                    OtherUserId = u.Id,
-                    OtherUserName = u.Name ?? u.UserName ?? "User",
-                    RequestTitle = r.Title,
-                    RequestId = r.Id
-                }))
-                .ToListAsync();
+                // ONLY show if there are messages.
+                var requestsIOwnDataQuery = DbContext.HelpRequests
+                    .Where(r => r.OwnerId == userId)
+                    .SelectMany(r => r.ContactedBy)
+                    .Select(cr => new 
+                    { 
+                        cr, 
+                        LastMessageDate = DbContext.Messages
+                            .Where(m => m.RequestId == cr.RequestId && (
+                                (m.SenderId == userId && m.ReceiverId == cr.UserId) || 
+                                (m.SenderId == cr.UserId && m.ReceiverId == userId)
+                            ))
+                            .OrderByDescending(m => m.Timestamp)
+                            .Select(m => (DateTime?)m.Timestamp)
+                            .FirstOrDefault()
+                    })
+                    .Where(x => x.LastMessageDate != null); // Filter out if no messages
 
-                chatItems = myContactedData.Concat(requestsIOwnData).ToList();
+                var requestsIOwnData = await requestsIOwnDataQuery
+                    .Select(x => new ChatItem
+                    {
+                        OtherUserId = x.cr.UserId,
+                        OtherUserName = x.cr.User.Name ?? x.cr.User.UserName ?? "User",
+                        RequestTitle = x.cr.Request.Title,
+                        RequestId = x.cr.RequestId,
+                        LastActive = x.LastMessageDate.Value
+                    })
+                    .ToListAsync();
+
+                chatItems = myContactedData.Concat(requestsIOwnData).OrderByDescending(c => c.LastActive).ToList();
             }
         }
         isLoading = false;

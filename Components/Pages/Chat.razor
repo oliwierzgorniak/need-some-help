@@ -143,7 +143,7 @@
         // 1. Get the Help Request info for context
         var request = await DbContext.HelpRequests
             .Include(r => r.Owner)
-            .Include(r => r.ContactedByUsers)
+            .Include(r => r.ContactedBy)
             .FirstOrDefaultAsync(r => r.Id == RequestId);
 
         if (request != null)
@@ -170,9 +170,9 @@
             {
                  otherUserId = activePartnerId;
             }
-            else if (request.ContactedByUsers.Any())
+            else if (request.ContactedBy.Any())
             {
-                 otherUserId = request.ContactedByUsers.First().Id;
+                 otherUserId = request.ContactedBy.First().UserId;
             }
         }
         else
@@ -238,16 +238,16 @@
                    // No messages yet? Then we can check the ContactedByUsers list.
                    // We need to fetch it explicitly
                    var reqWithContacts = await DbContext.HelpRequests
-                      .Include(r => r.ContactedByUsers)
+                      .Include(r => r.ContactedBy)
                       .FirstOrDefaultAsync(r => r.Id == RequestId);
                       
-                   if (reqWithContacts != null && reqWithContacts.ContactedByUsers.Any())
+                   if (reqWithContacts != null && reqWithContacts.ContactedBy.Any())
                    {
                         // Logic: Pick the first or most recent contact? 
                         // If the user insists on /chat/{RequestId}, and I am the owner, and 5 people contacted me...
                         // This logic forces a collision unless we assume 1 helper.
                         // We'll pick the first one for now as a fallback.
-                        receiverId = reqWithContacts.ContactedByUsers.First().Id;
+                        receiverId = reqWithContacts.ContactedBy.First().UserId;
                    }
                }
             }
