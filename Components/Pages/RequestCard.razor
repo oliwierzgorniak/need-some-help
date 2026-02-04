@@ -1,9 +1,7 @@
 <a href="@($"request/{Id}")" class="link">
     <RadzenStack Gap="0.625em" class="card-container">
-        <!-- Image Container -->
         <RadzenImage Path="@(string.IsNullOrEmpty(PhotoUrl) ? "assets/request-no-picture.jpg" : PhotoUrl)"
             class="request-image" AlternateText="Help request image" />
-        <!-- Content -->
         <div class="content">
             <RadzenText Text="@Title" TextStyle="TextStyle.H5" class="title" />
             <RadzenText Text="@(Location == "" ? "Location unknown" : Location)" TextStyle="TextStyle.Body1"
@@ -24,9 +22,4 @@
 
     [Parameter]
     public string? PhotoUrl { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        Console.WriteLine($"RequestCard parameters set: Id={Id}, Title={Title}, Location={Location}, PhotoUrl={PhotoUrl}");
-    }
 }
