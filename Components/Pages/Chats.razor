@@ -81,8 +81,8 @@
             {
                 using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-                // 1. Get requests I contacted (I am the helper, User is the Owner)
-                // Show regardless of message existence. Sort by LastMessage ?? ContactedAt
+                // LOGIC PART 1: CHATS WHERE I AM THE HELPER
+                // We find requests created by others that I have clicked "Contact" on.
                 var myContactedData = await dbContext.Users
                 .Where(u => u.Id == userId)
                 .SelectMany(u => u.ContactedRequests)
@@ -103,8 +103,9 @@
                 })
                 .ToListAsync();
 
-                // 2. Get requests I own that have been contacted (I am the owner, User is the helper)
-                // ONLY show if there are messages.
+                // LOGIC PART 2: CHATS WHERE I AM THE OWNER
+                // We find my own requests that other people have messaged me about.
+                // We ONLY show these if at least one message has been sent.
                 var requestsIOwnDataQuery = dbContext.HelpRequests
                 .Where(r => r.OwnerId == userId)
                 .SelectMany(r => r.ContactedBy)
@@ -122,6 +123,7 @@
                 })
                 .Where(x => x.LastMessageDate != null); // Filter out if no messages
 
+                // Convert the raw database query into the final ChatItem objects for the UI
                 var requestsIOwnData = await requestsIOwnDataQuery
                 .Select(x => new ChatItem
                 {
@@ -129,10 +131,11 @@
                     OtherUserName = x.cr.User.Name ?? x.cr.User.UserName ?? "User",
                     RequestTitle = x.cr.Request.Title,
                     RequestId = x.cr.RequestId,
-                    LastActive = x.LastMessageDate.Value
+                    LastActive = x.LastMessageDate ?? DateTime.Now
                 })
                 .ToListAsync();
 
+                // Combine both lists and sort by the most recent activity
                 chatItems = myContactedData.Concat(requestsIOwnData).OrderByDescending(c => c.LastActive).ToList();
             }
         }

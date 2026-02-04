@@ -12,7 +12,6 @@
 
 @if (isChecking)
 {
-    @* Loading state matches app background *@
     <div class="loading-container">
         <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate"
             Size="ProgressBarCircularSize.Medium" />
@@ -20,60 +19,14 @@
 }
 else
 {
-    <!-- Main Container matching Figma #F9F9FF background -->
-    <div class="@($"home-container {(isMapMode ? "map-mode" : "")}")">
-        @* <RadzenStack Gap="0.7em">
-            <!-- Search Bar (Node 138:4686) -->
-            <!-- Actions Row (Filter & Map) -->
-            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
-                AlignItems="AlignItems.Center">
-                <!-- Filter Chip (Node 137:4672) -->
-                <RadzenButton class="icon-filled" Text="Filter" Icon="filter_alt" ButtonStyle="ButtonStyle.Secondary"
-                    Variant="Variant.Flat" />
-                <!-- Map Button (Node 138:4700) -->
-                <RadzenButton class="icon-filled action-button" Click="@(() => isMapMode = !isMapMode)"
-                    Text="@(!isMapMode ? "Map" : "List")" Icon="@(!isMapMode ? "map" : "list")"
-                    ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" />
-            </RadzenStack>
-            @if (!isMapMode)
+    <div class="home-container">
+        <div class="cards-grid">
+            @foreach (var request in requests)
             {
-                <div class="search-container">
-                    <RadzenTextBox Text="Search" TextStyle="TextStyle.Body1" Class="search-input" />
-                    <RadzenIcon Icon="search" Class="search-icon" />
-                </div>
+                <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
+                    PhotoUrl="@request.PhotoUrl" />
             }
-
-        </RadzenStack> *@
-
-        <!-- Feed List (Node 136:4548) -->
-        @if (isMapMode)
-        {
-            <div class="home-map-container">
-                <RealTimeMap Height="100%" Width="100%" @ref="realTimeMap" Parameters="@mapParameters"
-                    OnAfterMapLoaded="@OnMapLoaded" OnClickMap="@OnMapClick">
-                </RealTimeMap>
-            </div>
-        }
-        else
-        {
-            @* <RadzenStack Gap="1rem" class="cards-container">
-                @foreach (var request in requests)
-                {
-                    <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
-                        PhotoUrl="@request.PhotoUrl" />
-                }
-            </RadzenStack> *@
-            <div class="cards-grid">
-                @foreach (var request in requests.Skip(skip).Take(pageSize))
-                {
-                    <RequestCard Id="@request.Id" Location="@request.Location" Title="@request.Title"
-                        PhotoUrl="@request.PhotoUrl" />
-                }
-            </div>
-
-            <RadzenPager Count="@requests.Count" PageSize="@pageSize" PageChanged="@OnPageChanged" Density="Density.Compact"
-                HorizontalAlign="HorizontalAlign.Center" />
-        }
+        </div>
         <Nav />
     </div>
 }
@@ -81,27 +34,12 @@ else
 @code {
     private bool isChecking = true;
 
-    // Pagination state
-    private int pageSize = 10;
-    private int skip = 0;
-
-    private void OnPageChanged(PagerEventArgs args)
-    {
-        skip = args.Skip;
-    }
-
     private class RequestItem
     {
         public int Id { get; set; }
         public required string Title { get; set; }
         public required string Location { get; set; }
         public string? PhotoUrl { get; set; }
-    }
-
-    private class IpLocation
-    {
-        public double latitude { get; set; }
-        public double longitude { get; set; }
     }
 
     private List<RequestItem> requests = new();
@@ -141,100 +79,6 @@ else
                 isChecking = false;
                 StateHasChanged();
             }
-
-            // Fetch and set user location
-            try
-            {
-                @* var location = await JSRuntime.InvokeAsync<IpLocation>("getUserLocation"); *@
-                var location = new IpLocation() { longitude = 21.0122287, latitude = 52.2296756 }; // Temporary hardcoded location
-                                                                                                   @* (Warsaw) for testing *@
-
-                if (location != null)
-                {
-                    // Update parameters for later initialization
-                    mapParameters.location.latitude = location.latitude;
-                    mapParameters.location.longitude = location.longitude;
-                    mapParameters.zoomLevel = 10;
-
-                    // If map is already initialized (e.g. user toggled quickly)
-                    if (realTimeMap != null)
-                    {
-                        realTimeMap.View.setCenter = new RealTimeMap.Location()
-                        {
-                            latitude = location.latitude,
-                            longitude = location.longitude
-                        };
-                        realTimeMap.View.setZoomLevel = 13;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error fetching location: {ex.Message}");
-            }
-        }
-    }
-
-    private bool isMapMode = false;
-    RealTimeMap? realTimeMap;
-    RealTimeMap.LoadParameters mapParameters = new RealTimeMap.LoadParameters()
-    {
-        location = new RealTimeMap.Location() { latitude = 0, longitude = 0 },
-        zoomLevel = 2
-    };
-
-    private List<RealTimeMap.StreamPoint> points = new List<RealTimeMap.StreamPoint> {
-new RealTimeMap.StreamPoint()
-{
-guid = Guid.NewGuid(),
-// Slightly north of the hardcoded Warsaw location (52.2296756, 21.0122287)
-latitude = 52.235,
-longitude = 21.0122287,
-type = "Help Request",
-value = "Gardening Help Needed",
-}
-};
-
-    private async Task OnMapLoaded(RealTimeMap.MapEventArgs args)
-    {
-        if (args.sender != null)
-        {
-            // Set appearance to use a marker icon (Standard Leaflet marker)
-            args.sender.Geometric.Points.Appearance().pattern = new RealTimeMap.PointIcon()
-            {
-                iconUrl = "assets/location-marker.svg",
-                iconSize = new int[] { 31, 45 },
-            };
-
-            await args.sender.Geometric.Points.upload(points);
-        }
-    }
-
-    private async Task OnMapClick(RealTimeMap.ClicksMapArgs args)
-    {
-        var map = args.sender as RealTimeMap;
-        if (map == null) return;
-
-        var clickedLocation = new RealTimeMap.StreamPoint()
-        {
-            latitude = args.location.latitude,
-            longitude = args.location.longitude
-        };
-
-        // Find points within 500 meters (approx click area)
-        var nearbyPoints = map.Geometric.Points.getItems(point =>
-        map.Geometric.Computations.distance(
-        point,
-        clickedLocation,
-        RealTimeMap.UnitOfMeasure.meters
-        ) <= 500
-        );
-
-        if (nearbyPoints != null && nearbyPoints.Any())
-        {
-            var p = nearbyPoints.First();
-            // Simple interaction handling
-            await JSRuntime.InvokeVoidAsync("alert", $"Clicked on request: {p.value}");
         }
     }
 }
