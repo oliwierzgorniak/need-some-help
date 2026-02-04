@@ -12,7 +12,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddSignalR().AddAzureSignalR(options =>
 {
-    options.ConnectionCount = 2;
+    options.InitialHubServerConnectionCount = 2;
 });
 builder.Services.AddRadzenComponents();
 

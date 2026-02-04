@@ -9,16 +9,11 @@
 .home-container {
   position: relative;
   padding: var(--screen-padding);
-  padding-bottom: 6rem;
+  /* padding-bottom: 6rem; */
   padding-top: 1rem;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-::deep .home-container.map-mode {
-  height: 100vh;
-  overflow: hidden;
 }
 
 ::deep .cards-grid {
@@ -29,21 +24,7 @@
     auto-fit,
     minmax(var(--request-card-width), 1fr)
   );
-  /* justify-content: center; */
-}
-
-/* !TODO fix map */
-
-.home-map-container {
-  flex: 1;
-}
-
-/* In case the component renders a body tag improperly or uses it as a root */
-.home-map-container body {
-  height: 100%;
-}
-
-/* Hide the available maps (layers) control */
-.home-map-container .leaflet-control-layers {
-  display: none;
+  overflow-y: auto;
+  height: 100vh;
+  padding-bottom: 5rem;
 }
