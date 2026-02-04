@@ -1,7 +1,6 @@
 .scroll-content {
   overflow-y: auto;
-  padding: 0 var(--screen-padding);
-  padding-bottom: 5rem;
+  padding: 1rem var(--screen-padding) 5rem var(--screen-padding);
   max-width: var(--max-content-width);
   margin: 0 auto;
   height: 100vh;
